@@ -2,7 +2,6 @@ const {DataSource} = require("typeorm");
 const path = require("path");
 const envPath = path.join(__dirname, "../utils","env")
 const dotenv = require("dotenv");
-const { json } = require("body-parser");
 dotenv.config({path: envPath});
 
 const appDataSoure = new DataSource({

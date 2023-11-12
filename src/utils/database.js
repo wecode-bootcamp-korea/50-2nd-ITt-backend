@@ -13,6 +13,7 @@ const appDataSoure = new DataSource({
     database: process.env.TYPEORM_DATABASE,
 })
 
+
 appDataSoure.initialize()
 .then(() => {
     console.log("Data Source has been initialize");

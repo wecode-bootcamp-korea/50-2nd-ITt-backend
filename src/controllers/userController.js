@@ -47,11 +47,15 @@ const profileUpdate = async(req, res) =>{
 
 
         const result = await userService.profileUpdate(imageUrl);
-        return res.json({message : "update_success"});
+        return res.json({message : "update_success", message : result[0]});
 
     }catch(error){
         if(error.message === "key_error"){
            return res.json({message : "key_error"});
+        }
+        
+        if(error.message === "user_not_found"){
+            return res.json({message : "user_not_found"})
         }
        return res.json({message : "추가 가능성이 있어 그대로 납둠 => 서비스에서 발생하는 에러도 여기서 잡을꺼다."})
     }

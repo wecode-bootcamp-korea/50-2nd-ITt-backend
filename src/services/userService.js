@@ -55,8 +55,19 @@ const profileUpdate = async (imageUrl) => {
             console.log("프로필 수정이 되지 않아 발생한 에러임")
             throw new Error("profile_update_error")
         }
-        return result;
+
+        // 업데이트 된 유저의 새로운 프로필 이미지 반환하기
+        const newUserProfileImage = await userDao.newUserProfileImage(userId);
+
+        if(newUserProfileImage.length === 0){
+            console.log("유저 ID 정보가 잘못되어 발생한 에러임")
+            throw new Error("user_not_found");
+        }
+
+        return newUserProfileImage;
+
     }catch(error){
+        console.log(error);
         throw error
     }
 }

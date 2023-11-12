@@ -75,10 +75,31 @@ const profileUpdate = async(imageUrl, userId) => {
     }
 }
 
+ // 업데이트 된 유저의 새로운 프로필 이미지 반환하기
+ const newUserProfileImage = async(userId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                select
+                    id,
+                    name,
+                    profile_image
+                from users
+                where id = ?
+            `,[userId]
+        )
+        return result;
+        
+    }catch(error){
+        throw error
+    }
+ }
+
 
 module.exports = {
     selectUserCredit,
     updateUserCredit,
     orderDelete,
-    profileUpdate
+    profileUpdate,
+    newUserProfileImage
 }

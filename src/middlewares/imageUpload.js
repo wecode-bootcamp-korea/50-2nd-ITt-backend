@@ -6,14 +6,14 @@ const dotenv = require("dotenv");
 dotenv.config({path: envPath});
 
 // 이미지 업로드 함수
-const imageUpload = async (profileImages) => { 
-    const fileStram = fs.createReadStream(profileImages.path); // fs모듈을 사용하여 받아온 이미지를 읽기 위한 스트림 생성
+const imageUpload = async (itemImages) => { 
+    const fileStram = fs.createReadStream(itemImages.path); // fs모듈을 사용하여 받아온 이미지를 읽기 위한 스트림 생성
 
     const params = {
         Bucket: process.env.AWS_S3_BUCKET, //aws-config 파일에 정의된 S3 버킷이름
-        Key: `images/${Date.now()}_${profileImages.originalname}`, // S3에 images라는 폴더가 생성돠고 업로드시간+파일명과 같이 저장됨
+        Key: `itemImages/${Date.now()}_${itemImages.originalname}`, // S3에 images라는 폴더가 생성돠고 업로드시간+파일명과 같이 저장됨
         Body: fileStram, // 받아온 파일 데이터
-        ContentType: profileImages.mimetype, // HTTP 헤더에 사용되는 브라우저가 인지하는 파일타입
+        ContentType: itemImages.mimetype, // HTTP 헤더에 사용되는 브라우저가 인지하는 파일타입
         // ACL: "public-read"
     };
 

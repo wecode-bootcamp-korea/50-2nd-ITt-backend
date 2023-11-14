@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const axios = require("axios")
 const dotenv = require('dotenv');
+const error = require('../utils/error');
 dotenv.config()
 
 
@@ -34,9 +35,7 @@ const kakaologin = async (code) => {
       },
     });
     if (!response || response.status !== 200) {
-      const error = new Error('KAKAO CONNECTION ERROR');
-      error.statusCode = 400;
-      throw error;
+      error.throwError(400,'KAKAO CONNECTION ERROR');
     }
     const userInfo = {
       kakaoId: response.data.id,

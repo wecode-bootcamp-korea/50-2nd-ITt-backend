@@ -7,5 +7,3 @@ const throwError = (code, message) => {
   module.exports = {
     throwError
   }
-
-  

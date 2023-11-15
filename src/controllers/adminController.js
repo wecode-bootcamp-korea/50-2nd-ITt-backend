@@ -2,13 +2,14 @@ const { json } = require("express");
 const adminService = require("../services/adminService");
 const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
+const { join } = require("path");
 
 // 관라지 페이지의 리스트
 const selectList = async(req, res) => { 
 
     try{
         const result = await adminService.selectList();
-        return res.json({message : result});
+        return res.json({data : result});
 
     }catch(error){
         console.log(error);
@@ -20,13 +21,14 @@ const selectList = async(req, res) => {
 const updateList = async(req, res) => {
 
     try{
-        const itemId = req.query.id
+        const itemId = req.params.itemId
 
         if(!itemId){
             throw new Error("key_error");
         }
         const result = await adminService.updateList(itemId)
-        return res.json({message : result});
+        console.log(result)
+        return res.json({data : result});
 
     }catch(error){
         console.log(error)
@@ -52,19 +54,19 @@ const uploadImage = async(req, res) => {
         // itemId와 이미지 URL 넘기기
         const result = await adminService.uploadImage(itemId, imageUrl)
 
-        return res.json({message : "update_success", message : result});
+        return res.json({data : "update_success", message : result});
 
     }catch(error){
 
         if(error.message === "key_error"){
-            return req.json({message : "key_error"});
+            return req.json({data : "key_error"});
         }
         
         if(error.messasge === "update_image_fail"){
-            return req.json({message : "update_image_fail"});
+            return req.json({data : "update_image_fail"});
         }
 
-        return req.json({message : "발생할 에러가 더 있을수 있다 리펙토링하면서 추가할게요"});
+        return req.json({data : "발생할 에러가 더 있을수 있다 리펙토링하면서 추가할게요"});
 
 
         throw error
@@ -82,16 +84,16 @@ const deleteList = async(req, res) => {
         }
 
         const result = adminService.deleteList(reservationId);
-        return res.json({message : "delete_success"});
+        return res.json({data : "delete_success"});
 
     }catch(error){
 
         if(error.message === "key_error"){
-            return req.json({message : "key_error"});
+            return req.json({data : "key_error"});
         }
 
         if(error.message === "delete_fail"){
-            return req.json({message : "delete_fail"})
+            return req.json({data : "delete_fail"})
         }
 
         throw error
@@ -99,11 +101,65 @@ const deleteList = async(req, res) => {
 }
 
 // 공연 추가
+const addList = async(req, res) => {
+    try{
+        const { title, description, viewerAge, runningTime, actorName, eventDate, categoryId, eventTime } = req.body;
+        const itemImages = req.file;
 
+        if(!title || !description || !viewerAge || !runningTime || !actorName || !eventDate || !itemImages |!categoryId |!eventTime){
+            throw new Error("key_error");
+        }
+
+        // AWS S3 이미지 업로드 
+        const uploadResult = await imageUpload(itemImages); //이미지 업로드
+        const imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
+
+        const result = await adminService.addList(title, description, viewerAge, runningTime, actorName, eventDate, categoryId, imageUrl, eventTime);
+        
+
+        // return req.json({message : "add_success"})
+
+    }catch(error){
+        if(error.message === "key_error"){
+            return res.json({error : "key_error"});
+        }
+        
+        if(error.message === "title_is_duplicate"){
+            return res.json({error : "title_is_duplicate"})
+        }
+
+        if(error.message === "no_update_data"){
+            return res.json({error : "no_update_data"})
+        }
+
+        if(error.message === "data_does_Not_exist"){
+            return res.json({error : "data_does_Not_exist"})
+        }
+
+        if(error.message === "actor_is_exist"){
+            return res.json({error : "actor_is_exist"})
+        }
+        
+        return res.json({error : "다른 에러 잡을꺼임"})
+    }
+}
+
+// 대시보드 
+const dashboardList = async (req, res) => {
+    try{
+        const result = await adminService.dashboardList();
+        return res.json({data : result});
+        
+    }catch(error){
+        return res.json({message : error});
+    }
+}
 
 module.exports = {
     selectList,
     updateList,
     uploadImage,
-    deleteList
+    deleteList,
+    addList,
+    dashboardList
 }

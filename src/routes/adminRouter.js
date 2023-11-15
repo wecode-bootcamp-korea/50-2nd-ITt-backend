@@ -8,13 +8,21 @@ const uploadItemImage = multer({dest : "itemImages/"}).single("itemImages");
 router.get("/selectList", adminController.selectList);
 
 // 공연 정보 우측에 수정 버튼 클릭 했을시
-router.get("/updateList", adminController.updateList);
+router.get("/updateList/:itemId", adminController.updateList);
 
-// 공연 이미지 업로드 버튼 클릭 했을 시
+// 공연 이미지 업로드 버튼 클릭 했을 시[[]]
 router.put("/uploadImage", uploadItemImage, adminController.uploadImage);
 
 // 공연 삭제 버튼 클릭 했을 시
 router.delete("/deleteList", adminController.deleteList);
+
+// 공연 추가 버튼 클릭 했을 시
+router.post("/addList", uploadItemImage, adminController.addList);
+
+// 대시보드 탭을 눌렀을 시
+router.get("/dashboardList", adminController.dashboardList);
+
+// 대시보드 상세 내역 출력
 
 module.exports = {
     router

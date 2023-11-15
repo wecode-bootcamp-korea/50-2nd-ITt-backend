@@ -25,15 +25,15 @@ const updateList = async(itemId) => {
         const seatInfo = await adminDao.seatList();
 
         // 공연 정보와 좌석 정보 가공
-        const modifiedItemInfo = itemInfo.map(item => {
-            // eventDate가 Date 객체인지 확인하고 ISO 문자열로 변환 후 날짜 부분만 추출
-            const eventDate = item.eventDate instanceof Date ? item.eventDate.toISOString().split('T')[0] : item.eventDate;
+        // const modifiedItemInfo = itemInfo.map(item => {
+        //     // eventDate가 Date 객체인지 확인하고 ISO 문자열로 변환 후 날짜 부분만 추출
+        //     const eventDate = item.eventDate instanceof Date ? item.eventDate.toISOString().split('T')[0] : item.eventDate;
 
-            return {
-                ...item,
-                eventDate 
-            };
-        });
+        //     return {
+        //         ...item,
+        //         eventDate 
+        //     };
+        // });
 
         // 좌석 금액의 소수점 제거
         const modifiedSeatInfo = seatInfo.map(seat => ({
@@ -43,7 +43,7 @@ const updateList = async(itemId) => {
 
 
         const result = {    
-            itemInfo: modifiedItemInfo,
+            itemInfo,
             seatInfo: modifiedSeatInfo
         }
 
@@ -92,10 +92,90 @@ const deleteList = async(reservationId) => {
 }
 
 // 공연 추가
+const addList = async(title, description, viewerAge, runningTime, actorName, eventDate, categoryId, imageUrl, eventTime) => {
+
+    try{
+        // 공연 정보 불러오기
+        const selectItemList = await adminDao.selectList()
+        
+        // for(let i = 0; i < selectItemList.length; i++){
+        //     if(selectItemList[i].title === title){
+        //         throw new Error("title_is_duplicate")
+        //     }
+        // }
+
+        // 추가된 공연정보 추가하기(공연이름, 상세정보, 관람등급, 상영시간, 카테고리, 공연 이미지)
+        const itemInfo = await adminDao.addList(title, description, viewerAge, runningTime, categoryId, imageUrl);
+
+        // 공연 정보가 테이블에 저장되지 않았을 경우
+        if(itemInfo.affectedRows !== 1){
+            throw new Error("no_update_data")
+        }
+
+        // 공연 정보 불러오기(추가한 공연정보의 ID를 가져와 actor 및 item option 테이블에 넣기 위함)
+        const selectItem = await adminDao.selectItem(title); // 등록한 타이블 명으로 불러온다(타이틀은 중복이 불가함)
+
+        // 데이터가 존재 하지 않을 경우 에러
+        if(selectItem.length === 0){
+            throw new Error("data_does_Not_exist")
+        }
+
+        console.log(selectItem[0].id);
+
+        // 데이터가 존재할 경우 해당 title에 대한 id를 가져온다.
+        const selectItemId = selectItem[0].id;
+
+        // 출연자 조회
+        const actorSelect = await adminDao.selecActor(actorName, selectItemId); // 업데이트 요청시 받아온 출연자 이름과 item_id를 조회한다.
+
+        //수정해야되...
+        const actorSelectItemId = actorSelect[0].item_id;
+        const actorSelectName = actorSelect[0].name;
+
+
+        // 출연자가 존재 할 경우 에러
+        if(actorSelect.length !== 0){ 
+            throw new Error("actor_is_exist")
+        }
+
+        // // 출연자의 ID와 출연자 name이 존재할 경우 에러 발생
+        if(actorSelectItemId === selectItemId && actorSelectName === actorName) {
+            throw new Error("actor_is_duplicate")
+        }
+
+        // 출연자 추가
+        const actorInfo = await adminDao.addActor(actorName, selectItemId);
+
+        // 공연 시간 추가
+        const addEventDate = await adminDao.addEventDate(eventDate, eventTime, selectItemId);
+        console.log(addEventDate);
+       
+        const test = await adminDao.updateList(selectItemId);
+
+
+    }catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
+// 대시보드 
+const dashboardList = async () => {
+    try{
+        const result = await adminDao.dashboardList();
+        return result;
+
+    }catch(error){
+        throw error;
+    }
+}
+
 
 module.exports = {
     selectList,
     updateList,
     uploadImage,
-    deleteList
+    deleteList,
+    addList,
+    dashboardList
 }

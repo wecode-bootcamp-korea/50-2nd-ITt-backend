@@ -159,7 +159,7 @@ const addList = async(title, description, viewerAge, runningTime, actorName, eve
     }
 }
 
-// 대시보드 
+// 대시보드 리스트 불러오기
 const dashboardList = async () => {
     try{
         const result = await adminDao.dashboardList();

@@ -144,7 +144,7 @@ const addList = async(req, res) => {
     }
 }
 
-// 대시보드 
+// 대시보드 리스트 불러오기
 const dashboardList = async (req, res) => {
     try{
         const result = await adminService.dashboardList();

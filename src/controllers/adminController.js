@@ -46,7 +46,7 @@ const uploadImage = async(req, res) => {
         }
 
         // AWS S3 이미지 업로드 
-        const uploadResult = await imageUpload(itemImages); //이미지 업로드
+        const uploadResult = await imageUpload.itemImageUpload(itemImages); //이미지 업로드
         const imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
 
         // itemId와 이미지 URL 넘기기

@@ -22,7 +22,8 @@ router.post("/addList", uploadItemImage, adminController.addList);
 // 대시보드 탭을 눌렀을 시
 router.get("/dashboardList", adminController.dashboardList);
 
-// 대시보드 상세 내역 출력
+// 대시보드 공연 예약 취소
+router.post("/dashboardCancel", adminController.dashboardCancel);
 
 module.exports = {
     router

@@ -162,13 +162,38 @@ const addList = async(title, description, viewerAge, runningTime, actorName, eve
 // 대시보드 리스트 불러오기
 const dashboardList = async () => {
     try{
-        const result = await adminDao.dashboardList();
+        const dashboardList = await adminDao.dashboardList();
+
+
+        // 좌석 금액의 소수점 제거
+        const modifiedSeatInfo = dashboardList.map(seat => ({
+            ...seat,
+            price: parseInt(seat.price).toString() // 문자열에서 소수점 제거
+          }));
+
+        const result = {
+            dashboardList : modifiedSeatInfo
+        }
+
         return result;
 
     }catch(error){
         throw error;
     }
 }
+
+// 대시보드 공연 예약 취소
+const dashboardCancel = async(userId, reservationId, price) => {
+    try{
+
+        //예약 취소
+        const result = await adminDao.dashboardCancel(reservationId, userId);
+        console.log(result);
+    }catch(error){
+        console.log(error);
+    }
+}
+
 
 
 module.exports = {
@@ -177,5 +202,6 @@ module.exports = {
     uploadImage,
     deleteList,
     addList,
-    dashboardList
+    dashboardList,
+    dashboardCancel
 }

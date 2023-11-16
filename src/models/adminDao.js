@@ -7,11 +7,14 @@ const selectList = async() => {
     try{
         const result = await database.appDataSoure.query(
             `
-                SELECT
-                    id,
-                    title,
-                    description
-                FROM items
+            SELECT 
+                i.id as userId,
+                i.title as title,
+                c.name as categoryName,
+                i.item_notice 
+            from categories c 
+                join items i on c.id = i.category_id 
+            order by c.id desc;
             `
         )
         return result;
@@ -270,6 +273,23 @@ const dashboardList = async () => {
     }
 }
 
+// 대시보드 공연 예약 취소
+const dashboardCancel = async(reservationId, userId) => {
+    try{
+        const result = database.appDataSoure.query(
+            `
+            update reservations 
+                set status = 'cancel' 
+            where id = ?  and user_id = ?;
+            `,[reservationId, userId]
+        )
+        return result
+    }catch(error){
+        console.log(error)
+        throw error;
+    }
+}
+
 
 
 
@@ -285,5 +305,6 @@ module.exports = {
     selectItem,
     selecActor,
     addEventDate,
-    dashboardList
+    dashboardList,
+    dashboardCancel
 }

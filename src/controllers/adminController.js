@@ -142,7 +142,7 @@ const addList = async(req, res) => {
     }
 }
 
-// 대시보드 리스트 불러오기
+// 대시보드 공연 예약 리스트 불러오기
 const dashboardList = async (req, res) => {
     try{
         const result = await adminService.dashboardList();
@@ -153,11 +153,32 @@ const dashboardList = async (req, res) => {
     }
 }
 
+// 대시보드 공연 예약 취소
+const dashboardCancel = async(req, res) => {
+
+    try{
+        const {userId, reservationId, price} = req.body;
+        
+        if(!userId || !reservationId || !price){
+            throw new Error("key_error");
+        }
+
+        const result = await adminService.dashboardCancel(userId, reservationId, price);
+        
+
+    }catch(error){
+        if(error.message === "key_error"){
+            return res.json({message : "key_error"});
+        }
+    }
+}
+
 module.exports = {
     selectList,
     updateList,
     uploadImage,
     deleteList,
     addList,
-    dashboardList
+    dashboardList,
+    dashboardCancel
 }

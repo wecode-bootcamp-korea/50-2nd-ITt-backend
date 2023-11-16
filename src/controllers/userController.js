@@ -4,6 +4,25 @@ const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
 
 
+// 유저 정보 불러오기
+const userInfo = async(req, res) => {
+
+    const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
+
+    try{
+        if(!userTokenDecode){
+            throw new Error("key_error");
+        }
+
+        const result = await userService.userInfo(userTokenDecode);
+        return res.json({data : result})
+
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 // //mypage 주문 취소
 const orderCancel = async(req, res) => {
 
@@ -32,8 +51,12 @@ const orderCancel = async(req, res) => {
         if(error.message === "user_does_not_exist"){ // 유저정보가 일치하지 않을 경우
             return res.json({message : "user_does_not_exist"})
         }
+
+        if(error.message === "reservationInfo_not_found"){ // 주문 정보가 없을 경우
+            return res.json({message : "reservationInfo_not_found"})
+        }
         
-        if(error.message === "order_delete_error"){ //삭제할 결제 데이터가 없을 경우
+        if(error.message === "order_delete_error"){ // 주문 취소에 실패 했을 경우
             return res.json({message : "order_delete_error"})
         }
 
@@ -52,19 +75,25 @@ const orderCancel = async(req, res) => {
 const profileUpdate = async(req, res) =>{
 
     //여기서 토큰의 정보를 같이 받을거임
+    const userName = req.body.name; // 유저 이름 받기
     const profileImage = req.file // 업로드 파일 받기
     const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
 
     try{
-        if(!profileImage || !userTokenDecode){
+        if( !userName && !profileImage  && !userTokenDecode){
             throw new Error("key_error");
         }
-        
-        // AWS S3 이미지 업로드 
-        const uploadResult = await imageUpload(profileImage); //이미지 업로드
-        const imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
-        
-        const result = await userService.profileUpdate(imageUrl, userTokenDecode);
+
+        // AWS S3 이미지 업로드
+        let uploadResult = "" 
+        let imageUrl = ""
+
+        if(profileImage) { // 프로필 이미지가 있을 경우
+            uploadResult = await imageUpload(profileImage); //이미지 업로드
+            imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
+        }
+
+        const result = await userService.profileUpdate(imageUrl, userTokenDecode, userName);
         return res.json({message : "update_success", message : result[0]});
 
     }catch(error){
@@ -75,11 +104,16 @@ const profileUpdate = async(req, res) =>{
         if(error.message === "user_not_found"){
             return res.json({message : "user_not_found"})
         }
+
+        if(error.message === "userName_update_error"){
+            return res.json({message : "userName_update_error"})
+        }
        return res.json({message : "추가 가능성이 있어 그대로 납둠 => 서비스에서 발생하는 에러도 여기서 잡을꺼다."})
     }
 }
 
 module.exports = {
+    userInfo,
     orderCancel,
     profileUpdate
 }

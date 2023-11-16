@@ -6,6 +6,7 @@ dotenv.config();
 const verfiyToken  = async (req, res, next) => {
     const jwtToken = req.headers.authorization;
     const secetkey = process.env.SECRET_KEY;
+    
 
     if(!jwtToken){
         res.status(403).json({message : "권한이 없습니다"})

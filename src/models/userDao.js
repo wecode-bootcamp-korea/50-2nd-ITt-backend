@@ -1,5 +1,24 @@
 const database = require("../utils/database");
 
+// 유저 정보 불러오기
+const userInfo = async(userId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT
+                    name,
+                    profile_image as profileImage
+                FROM users
+                WHERE id = ?
+            `,[userId]
+        )
+        return result
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 // 유저 정보 조회
 const selectUserInfo = async(userId) =>{
     try{
@@ -21,23 +40,23 @@ const selectUserInfo = async(userId) =>{
     }
 }
 
-// // 주문 내역 조회
-// const selectReserveInfo = async(reservationId, userId) => {
-//     try{
-//         const result = await database.appDataSoure.query(
-//             `
-//                 SELECT 
-//                     id,
-//                     amount
-//                 FROM reservations
-//                 WHERE id = ? and user_id =?
-//             `,[reservationId, userId]
-//         )
-//         return result;
-//     }catch(error){
-//         throw error;
-//     }
-// }
+// 주문 내역 조회
+const selectReserveInfo = async(reservationId, userId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT 
+                    id,
+                    amount
+                FROM reservations
+                WHERE id = ? and user_id =?
+            `,[reservationId, userId]
+        )
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
 
 
 // 유저 크레딧 업데이트
@@ -74,7 +93,7 @@ const updateOrderStatus = async(reservationId, userId) => {
     }
 }
 
-//mypage 프로필 수정 (유저 아이디 검증 필요)
+//mypage 프로필 수정
 const profileUpdate = async(imageUrl, userId) => {
     try{
         const result = await database.appDataSoure.query(
@@ -111,10 +130,31 @@ const newUserProfileImage = async(userId) =>{
     }
 }
 
+// 유저 이름 변경하기
+const updateUserName = async(userName, userId) =>{
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE users
+                    SET name = ?
+                WHERE id = ?
+            `,[userName, userId]
+        )
+        console.log(result);
+        return result;
+    }catch(error){
+        throw error
+    }
+}
+
+
 module.exports = {
+    userInfo,
     selectUserInfo,
+    selectReserveInfo,
     updateUserCredit,
     updateOrderStatus,
     profileUpdate,
-    newUserProfileImage
+    newUserProfileImage,
+    updateUserName
 }

@@ -4,7 +4,6 @@ const { Route53RecoveryCluster } = require("aws-sdk");
 
 // 관라지 페이지의 리스트
 const selectList = async() => {
-
     try{
         const result = await adminDao.selectList();
         return result
@@ -20,6 +19,7 @@ const updateList = async(itemId) => {
     try{
         // 공연 정보 불러오기
         const itemInfo = await adminDao.updateList(itemId);
+        console.log(itemInfo);
 
         // 좌석 정보 불러오기
         const seatInfo = await adminDao.seatList();
@@ -35,19 +35,19 @@ const updateList = async(itemId) => {
         //     };
         // });
 
-        // 좌석 금액의 소수점 제거
-        const modifiedSeatInfo = seatInfo.map(seat => ({
-            ...seat,
-            price: parseInt(seat.price).toString() // 문자열에서 소수점 제거
-          }));
+        // // 좌석 금액의 소수점 제거
+        // const modifiedSeatInfo = seatInfo.map(seat => ({
+        //     ...seat,
+        //     price: parseInt(seat.price).toString() // 문자열에서 소수점 제거
+        //   }));
 
 
-        const result = {    
-            itemInfo,
-            seatInfo: modifiedSeatInfo
-        }
+        // const result = {    
+        //     itemInfo,
+        //     seatInfo
+        // }
 
-        return result;
+        // return result;
     }catch(error){
         throw error;
     }

@@ -6,28 +6,26 @@ const { join } = require("path");
 
 // 관라지 페이지의 리스트
 const selectList = async(req, res) => { 
-
     try{
         const result = await adminService.selectList();
         return res.json({data : result});
 
     }catch(error){
-        console.log(error);
+
         throw error;
     }
 } 
 
-// 공연 정보 불러오기
+// 공연 상세정보 불러오기
 const updateList = async(req, res) => {
-
     try{
-        const itemId = req.params.itemId
+        const itemId = req.params.itemId // 공연에 대한 id 값 받아오기
 
         if(!itemId){
             throw new Error("key_error");
         }
+
         const result = await adminService.updateList(itemId)
-        console.log(result)
         return res.json({data : result});
 
     }catch(error){

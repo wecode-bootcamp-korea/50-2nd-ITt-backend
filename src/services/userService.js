@@ -2,9 +2,10 @@ const userDao = require("../models/userDao")
 
 
 //mypage 주문 취소
-const orderCancel = async (reservationId, totalAmount, userTokenDecode) => {
+const orderCancel = async (reservationInfo, userTokenDecode) => {
     try{
         //토큰의 유저 ID, Email 가져오기
+
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
@@ -17,15 +18,18 @@ const orderCancel = async (reservationId, totalAmount, userTokenDecode) => {
             throw new Error("user_does_not_exist")
         }
   
-        if(selecUserInfo.length === 0){ // db에서 유저가 조회되지 않았을 경우
+        if(selectUserInfo.length === 0){ // db에서 유저가 조회되지 않았을 경우
             throw new Error("order_delete_error");
         }
 
-        const userCredit = selectUserCredit[0].credit; // 유저 크레딧 정보 담기
-        const userTotalCredit = totalAmount + userCredit; // 결제한 크레딧 + 유저의 기존 크레딧
-    
+         const userCredit = selectUserInfo[0].credit; // 유저 크레딧 정보 담기
+         const totalAmount = reservationInfo.length * reservationInfo[0].price // 주문 개수 * 단일 가격
+         const userTotalCredit = totalAmount + userCredit; // 결제 가격 + 유저 크레딧
+                   
+
         // 결제 취소 분 크레딧 업데이트
         const updateUserCredit = await userDao.updateUserCredit(userTotalCredit, userId);
+
 
         if(updateUserCredit.affectedRows === 0){
             console.log("유저 크레딧 업데이트 에러");
@@ -33,16 +37,21 @@ const orderCancel = async (reservationId, totalAmount, userTokenDecode) => {
         }
         
         // 주문 데이터 업데이트 -> 데이터 삭제가 아닌 status 값을 cancel로 변경
-        const updateOrderStatus = await userDao.updateOrderStatus(reservationId, userId);
 
-        if(updateOrderStatus.affectedRows === 0){
-            console.log("유저 주문정보 삭제 에러");
-            throw new Error("order_delete_error")
+        let updateOrderStatus = ""
+
+        for(let i = 0; i < reservationInfo.length; i++){ // 주문 상태 값 변경 정보 조회
+            updateOrderStatus =  await userDao.updateOrderStatus(reservationInfo[i].reservationId, userId);
+            
+            if(updateOrderStatus.affectedRows === 0){
+                throw new Error("user_credit_update_fail")
+            }
         }
 
         return true; // cancel 처리가 완료되면 true 리턴
 
     }catch(error){
+        console.log(error)
         throw error
     }
 }

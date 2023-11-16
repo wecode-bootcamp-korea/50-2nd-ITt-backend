@@ -21,6 +21,25 @@ const selectUserInfo = async(userId) =>{
     }
 }
 
+// // 주문 내역 조회
+// const selectReserveInfo = async(reservationId, userId) => {
+//     try{
+//         const result = await database.appDataSoure.query(
+//             `
+//                 SELECT 
+//                     id,
+//                     amount
+//                 FROM reservations
+//                 WHERE id = ? and user_id =?
+//             `,[reservationId, userId]
+//         )
+//         return result;
+//     }catch(error){
+//         throw error;
+//     }
+// }
+
+
 // 유저 크레딧 업데이트
 const updateUserCredit = async(userTotalCredit, userId) => {
     try{
@@ -49,7 +68,6 @@ const updateOrderStatus = async(reservationId, userId) => {
                 WHERE id = ? and user_id = ?
             `,[reservationId, userId]
         )
-
         return result
     }catch(error){
         throw error
@@ -66,9 +84,7 @@ const profileUpdate = async(imageUrl, userId) => {
             where id = ?
             `,[imageUrl, userId]
         )
-
         return result;
-        
     }catch(error){
         throw error
     }

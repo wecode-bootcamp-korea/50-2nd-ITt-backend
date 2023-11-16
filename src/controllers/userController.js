@@ -7,15 +7,15 @@ const imageUpload = require("../middlewares/imageUpload");
 // //mypage 주문 취소
 const orderCancel = async(req, res) => {
 
-    const {reservationId, totalAmount} = req.body;
+    const reservationInfo = req.body
     const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
 
     try{
-        if(!reservationId || !totalAmount || !userTokenDecode){ // key 검증
+        if(!reservationInfo || !userTokenDecode){ // key 검증
             throw new Error("key_error");
         }
 
-        const result = await userService.orderCancel(reservationId, totalAmount, userTokenDecode);
+        const result = await userService.orderCancel(reservationInfo, userTokenDecode);
 
         if(result !== true){
             throw new Error("cancel_fail")
@@ -40,6 +40,11 @@ const orderCancel = async(req, res) => {
         if(error.message === "cancel_fail"){
             return res.json({message : "cancel_fail"}) // result 값이 true 가 아닐 경우
         }
+
+        if(error.message === "user_credit_update_fail"){
+            return res.json({message : "user_credit_update_fail"}) // 유저의 credit 값이 업데이트가 되지 않았을 경우
+        }
+
     }
 }
 

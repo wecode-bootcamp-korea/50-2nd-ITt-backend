@@ -184,8 +184,9 @@ const dashboardList = async () => {
 
 // 대시보드 공연 예약 취소
 const dashboardCancel = async(userId, reservationId, price) => {
-    try{
 
+    try{
+        
         //예약 취소
         const result = await adminDao.dashboardCancel(reservationId, userId);
         console.log(result);

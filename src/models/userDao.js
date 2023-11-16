@@ -1,16 +1,55 @@
 const database = require("../utils/database");
 
-
-//mypage 주문 취소(유저 아이디 비교해서 삭제해야함)
-const orderDelete = async(reservationId) => {
+// 유저 정보 조회
+const selectUserInfo = async(userId) =>{
     try{
         const result = await database.appDataSoure.query(
             `
-                delete 
-                    from reservations
-                where status = "confirmed" and id = ? 
-            `,[reservationId]
+                SELECT 
+                    id,
+                    name,
+                    email,
+                    credit,
+                    profile_image as profileImage
+                FROM users
+                WHERE id = ?
+            `,[userId]
         )
+        return result;
+    }catch(error){
+        throw error
+    }
+}
+
+// 유저 크레딧 업데이트
+const updateUserCredit = async(userTotalCredit, userId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE users
+                SET credit = ?
+                WHERE id = ?
+            `,[userTotalCredit, userId]
+        )
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
+
+
+//mypage 주문 취소(유저 아이디 비교해서 삭제해야함)
+const updateOrderStatus = async(reservationId, userId) => {
+
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE reservations
+                  SET status = "cancel"
+                WHERE id = ? and user_id = ?
+            `,[reservationId, userId]
+        )
+
         return result
     }catch(error){
         throw error
@@ -18,14 +57,14 @@ const orderDelete = async(reservationId) => {
 }
 
 //mypage 프로필 수정 (유저 아이디 검증 필요)
-const profileUpdate = async(imageUrl) => {
+const profileUpdate = async(imageUrl, userId) => {
     try{
         const result = await database.appDataSoure.query(
             `
             update users
             set profile_image = ?
-            where id = 2
-            `,[imageUrl]
+            where id = ?
+            `,[imageUrl, userId]
         )
 
         return result;
@@ -36,7 +75,30 @@ const profileUpdate = async(imageUrl) => {
 }
 
 
+// 업로드된 프로필 이미지 반환하기
+const newUserProfileImage = async(userId) =>{
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT 
+                    id,
+                    name,
+                    email,
+                    profile_image as profileImage
+                FROM users
+                WHERE id = ?
+            `,[userId]
+        )
+        return result;
+    }catch(error){
+        throw error
+    }
+}
+
 module.exports = {
-    orderDelete,
-    profileUpdate
+    selectUserInfo,
+    updateUserCredit,
+    updateOrderStatus,
+    profileUpdate,
+    newUserProfileImage
 }

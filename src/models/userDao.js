@@ -147,6 +147,25 @@ const updateUserName = async(userName, userId) =>{
     }
 }
 
+// 유저 이름과 프로필 변경하기
+const updateUserInfo = async(userName, imageUrl, userId) =>{
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE users
+                SET name = ?, profile_image = ?
+                WHERE id = ?
+            `,[userName, imageUrl, userId]
+        )
+        console.log(result);
+        return result;
+    }catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
+
 
 module.exports = {
     userInfo,
@@ -156,5 +175,6 @@ module.exports = {
     updateOrderStatus,
     profileUpdate,
     newUserProfileImage,
-    updateUserName
+    updateUserName,
+    updateUserInfo,
 }

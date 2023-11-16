@@ -82,6 +82,7 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
+
         // 유저 데이터 크레딧 및 유저 정보 조회
         const selectUserInfo = await userDao.selectUserInfo(userId) // 토큰의 userId로 유저의 크레딧 조회
         const dbUserId = selectUserInfo[0].id; // db에 저장된 유저 id 정보
@@ -101,9 +102,18 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
         }
         // 유저 이름만 변경 할 경우
         if(!imageUrl && userName){
+
             result = await userDao.updateUserName(userName, userId);
             if(result.affectedRows === 0){
                 throw new Error("userName_update_error")
+            }
+        }
+
+        // 유저 이름과 프로필 변경하기
+        if(imageUrl || userName){
+            result = await userDao.updateUserInfo(userName, imageUrl, userId)
+            if(result.affectedRows === 0){
+                throw new Error("userProfile_userName_update_error")
             }
         }
 

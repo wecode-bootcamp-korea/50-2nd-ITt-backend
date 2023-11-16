@@ -78,6 +78,7 @@ const profileUpdate = async(req, res) =>{
     const userName = req.body.name; // 유저 이름 받기
     const profileImage = req.file // 업로드 파일 받기
     const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
+    console.log(profileImage);
 
     try{
         if( !userName && !profileImage  && !userTokenDecode){
@@ -89,7 +90,7 @@ const profileUpdate = async(req, res) =>{
         let imageUrl = ""
 
         if(profileImage) { // 프로필 이미지가 있을 경우
-            uploadResult = await imageUpload(profileImage); //이미지 업로드
+            uploadResult = await imageUpload.profileImageUpload(profileImage); //이미지 업로드
             imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
         }
 
@@ -108,7 +109,10 @@ const profileUpdate = async(req, res) =>{
         if(error.message === "userName_update_error"){
             return res.json({message : "userName_update_error"})
         }
-       return res.json({message : "추가 가능성이 있어 그대로 납둠 => 서비스에서 발생하는 에러도 여기서 잡을꺼다."})
+
+        if(error.message === "userProfile_userName_update_error"){
+            return res.json({message : "userProfile_userName_update_error"})
+        }
     }
 }
 

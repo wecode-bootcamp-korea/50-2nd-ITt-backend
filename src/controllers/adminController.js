@@ -19,7 +19,6 @@ const selectList = async(req, res) => {
 const updateList = async(req, res) => {
     try{
         const itemId = req.params.itemId // 공연에 대한 id 값 받아오기
-        console.log(itemId)
 
         if(!itemId){
             throw new Error("key_error");

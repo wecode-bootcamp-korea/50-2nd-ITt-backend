@@ -29,6 +29,8 @@ const updateList = async(itemId) => {
             actorInfo
         }
 
+        
+
         return result;
 
         // // 좌석 정보 불러오기

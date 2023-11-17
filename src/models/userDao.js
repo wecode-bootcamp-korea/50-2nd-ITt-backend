@@ -47,7 +47,8 @@ const selectReserveInfo = async(reservationId, userId) => {
             `
                 SELECT 
                     id,
-                    amount
+                    amount,
+                    seat_id as seatId
                 FROM reservations
                 WHERE id = ? and user_id =?
             `,[reservationId, userId]
@@ -71,6 +72,23 @@ const updateUserCredit = async(userTotalCredit, userId) => {
         )
         return result;
     }catch(error){
+        throw error;
+    }
+}
+
+// 예약상태 업데이트
+const updateSeatBooked = async(seatId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE seats
+                    SET is_booked = 1
+                WHERE id = ?
+            `,[seatId]
+        )
+        return result;
+    }catch(error){
+        console.log(error);
         throw error;
     }
 }
@@ -173,6 +191,7 @@ module.exports = {
     selectReserveInfo,
     updateUserCredit,
     updateOrderStatus,
+    updateSeatBooked,
     profileUpdate,
     newUserProfileImage,
     updateUserName,

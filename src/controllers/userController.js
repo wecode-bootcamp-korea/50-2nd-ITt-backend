@@ -68,6 +68,10 @@ const orderCancel = async(req, res) => {
             return res.json({message : "user_credit_update_fail"}) // 유저의 credit 값이 업데이트가 되지 않았을 경우
         }
 
+        if(error.message === "seat_status_update_fail"){
+            return res.json({message : "seat_status_update_fail"})
+        }
+
     }
 }
 

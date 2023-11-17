@@ -1,3 +1,4 @@
+const e = require("express");
 const userDao = require("../models/userDao")
 
 // 유저 정보 불러오기
@@ -40,11 +41,12 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
         let selectReserveInfo = "";
         for(let i = 0; i < reservationInfo.length; i++){
             selectReserveInfo = await userDao.selectReserveInfo(reservationInfo[i].reservationId, userId);
+
             if(selectReserveInfo.length === 0){
                 throw new Error("reservationInfo_not_found")
             }
         }
-;
+
          const userCredit = selectUserInfo[0].credit; // 유저 크레딧 정보 담기
          const totalAmount = reservationInfo.length * reservationInfo[0].price // 주문 개수 * 단일 가격
          const userTotalCredit = totalAmount + userCredit; // 결제 가격 + 유저 크레딧
@@ -65,6 +67,17 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
                 throw new Error("user_credit_update_fail")
             }
         }
+
+        // 좌석 예약 상태 업데이트
+            let updateSeatBooked = ""
+            for(let i = 0; i < reservationInfo.length; i++){
+                selectReserveInfo = await userDao.selectReserveInfo(reservationInfo[i].reservationId, userId);
+                updateSeatBooked = await userDao.updateSeatBooked(selectReserveInfo[0].seatId);
+
+                if(updateSeatBooked.affectedRows === 0){
+                    throw new Error("seat_status_update_fail")
+                }
+            }
 
         return true; // cancel 처리가 완료되면 true 리턴
 

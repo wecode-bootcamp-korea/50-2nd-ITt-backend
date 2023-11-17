@@ -58,7 +58,10 @@ const updateReserveList = async(itemId, title, runningTime, viewerAge, price, it
             throw new Error("update_reserveInfo_fail");
         }
 
-        const updateCategoryName = adminDao.updateCategoryName()
+        // 카테고리 변경
+        // const categoryId = adminDao.
+
+        const updateCategoryName = adminDao.updateCategoryName() //카테고리 이름 업데이트
         
         //업로드된 이미지 반환
         const selectImage =  await adminDao.selectImage(itemId);

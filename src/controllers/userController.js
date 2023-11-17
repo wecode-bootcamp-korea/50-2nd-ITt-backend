@@ -3,7 +3,6 @@ const userService = require("../services/userService");
 const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
 
-
 // 유저 정보 불러오기
 const userInfo = async(req, res) => {
 
@@ -82,6 +81,7 @@ const profileUpdate = async(req, res) =>{
     const userName = req.body.name; // 유저 이름 받기
     const profileImage = req.file // 업로드 파일 받기
     const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
+    
     console.log(profileImage);
 
     try{

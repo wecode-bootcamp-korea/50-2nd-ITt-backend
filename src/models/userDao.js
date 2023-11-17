@@ -7,7 +7,6 @@ const getUserByEmail = async (email) => {
     WHERE 
     email = ?`,
     [email]);
-    console.log(result)
     return result;
   };
 

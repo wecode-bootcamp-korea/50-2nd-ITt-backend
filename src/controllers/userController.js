@@ -13,7 +13,6 @@ const adminsignup = async (req, res) => {
 const kakaologin = async (req, res) => {
     try {
         const code = req.headers.code;
-
       if (!code){
         return res.status(400).json({message:'INVALID_ACCESTOKEN'})
       }
@@ -22,14 +21,21 @@ const kakaologin = async (req, res) => {
         return res.status(200).json({result});
 
     } catch (error) {
-        // if(error.message === "Request failed with status code 400"){
-        //     return res.json({message : "카카오 코드 중복"})
-        // }
+        return res.json({message : error.message})
+    }
+}
+
+const adminlogin = async (req, res) => {
+    try {
+        const data = await userService.adminlogin(req.body)
+        return res.status(200).json(data)
+    } catch (error) {
         return res.json({message : error.message})
     }
 }
 
 module.exports  = { 
     adminsignup, 
-    kakaologin
+    kakaologin,
+    adminlogin
 }

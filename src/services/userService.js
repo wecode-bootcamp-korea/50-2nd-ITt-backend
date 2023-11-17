@@ -6,6 +6,8 @@ const dotenv = require('dotenv');
 const error = require('../utils/error');
 const kakao = require('../middlewares/kakao')
 const jwtToken = require('../middlewares/jwtToken')
+const { throwError } = require('../utils/error');
+const e = require('express');
 dotenv.config()
 
 
@@ -52,35 +54,74 @@ const kakaologin = async (code) => {
     const dbUserId = userSearch[0].id
     const dbUserEmail = userSearch[0].email
     const dbUserName = userSearch[0].name
+    const isAdmin = userSearch[0].is_admin
+    const profileImage = userSearch[0].profile_image 
 
-    const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName);
+    const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName, isAdmin, profileImage );
 
     return {
         message:"SIGN_UP_SUCCESS",
         token : token,
         id : dbUserId,
         email : dbUserEmail,
-        userName : dbUserName
+        name : dbUserName,
+        is_admin : isAdmin,
+        profile_image : profileImage
     };
   } else {
     const userSearch = await userDao.getUserByEmail(email);
-
+    
     const dbUserId = userSearch[0].id;
     const dbUserEmail = userSearch[0].email;
     const dbUserName = userSearch[0].name;
-    
-      const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName);
+    const isAdmin = userSearch[0].is_admin
+    const profileImage = userSearch[0].profile_image 
+
+      const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName, isAdmin, profileImage);
       return {
         message:"SIGN_IN_SUCCESS",
         token : token,
         id : dbUserId,
         email : dbUserEmail,
-        userName : dbUserName
+        name : dbUserName,
+        is_admin : isAdmin,
+        profile_image : profileImage
     };
   }
 }
 
+const adminlogin = async (data) => {
+  const email = data.email;
+  const password = data.password;
+
+  const userSearch = await userDao.getUserByEmail(email);
+  
+  if (userSearch.length===0) {
+    throwError(400,"NON_EXISTENT_USER");
+  }
+  const isPasswordValid = await bcrypt.compare(password, userSearch[0].password);
+  if (!isPasswordValid) {
+    throwError(400,"INVALID_PASSWORD");
+  }
+  
+  const token = jwt.sign(
+    { id: userSearch[0].id, 
+      email: userSearch[0].email, 
+      name: userSearch[0].name, 
+      isAdmin:userSearch[0].is_admin 
+    }, process.env.SECRET_KEY);
+  return {
+    message: "ADMIN_SIGN_IN_SUCCESS",
+    token : token,
+    id : userSearch[0].id,
+    email : userSearch[0].email,
+    name : userSearch[0].name,
+    is_admin : userSearch[0].is_admin
+  };
+}
+
 module.exports = {
     adminsignup,
-    kakaologin
+    kakaologin,
+    adminlogin
 }

@@ -19,10 +19,20 @@ const updateList = async(itemId) => {
     try{
         // 공연 정보 불러오기
         const itemInfo = await adminDao.updateList(itemId);
-        console.log(itemInfo);
 
-        // 좌석 정보 불러오기
-        const seatInfo = await adminDao.seatList();
+        // 출연자 정보 불러오기
+        const actorInfo = await adminDao.actorInfo(itemId);
+
+        // 공연 정보 + 출연자 정보
+        const result = {
+            itemInfo,
+            actorInfo
+        }
+
+        return result;
+
+        // // 좌석 정보 불러오기
+        // const seatInfo = await adminDao.seatList();
 
         // 공연 정보와 좌석 정보 가공
         // const modifiedItemInfo = itemInfo.map(item => {

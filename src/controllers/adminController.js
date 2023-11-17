@@ -4,14 +4,13 @@ const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
 const { join } = require("path");
 
-// 관라지 페이지의 리스트
+// 관라지 페이지 공연 리스트 불러오기
 const selectList = async(req, res) => { 
     try{
         const result = await adminService.selectList();
         return res.json({data : result});
 
     }catch(error){
-
         throw error;
     }
 } 
@@ -20,6 +19,7 @@ const selectList = async(req, res) => {
 const updateList = async(req, res) => {
     try{
         const itemId = req.params.itemId // 공연에 대한 id 값 받아오기
+        console.log(itemId)
 
         if(!itemId){
             throw new Error("key_error");

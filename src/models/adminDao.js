@@ -30,23 +30,15 @@ const updateList = async(itemId) => {
       
         const result = await database.appDataSoure.query(
             `
-            select 
-                i.id,
-                i.title,
-                i.image,
-                i.description,
+            SELECT 
+                i.title as title,
+                i.image as image,
                 i.running_time as runningTime,
                 i.viewer_age as viewerAge,
-                ip.event_date as eventDate,
-                ac.name,
-                c.name as category
-            from items i
-                join item_options ip on i.id = ip.item_id
-                join actors ac on i.id = ac.item_id
-                join categories c on i.category_id = c.id 
-            where i.id = ?
-                group by ip.event_date;
-
+                i.price as price,
+                i.item_notice as itemNotice
+            FROM items i
+            where i.id = ?;
             `,[itemId]
         )
         console.log(result)
@@ -57,24 +49,40 @@ const updateList = async(itemId) => {
     }
 }
 
-// 좌석 정보 불러오기
-const seatList = async(itemId) => {
+const actorInfo = async(itemId) => {
     try{
-      
         const result = await database.appDataSoure.query(
             `
-            select 
-                name,
-                price
-            from seat_class 
-            `
+            SELECT
+                name as actorName
+            FROM actors
+            WHERE item_id = ?  
+            `,[itemId]
         )
-        return result;
+        return result
     }catch(error){
-        console.log(error)
         throw error;
     }
 }
+
+// // 좌석 정보 불러오기
+// const seatList = async(itemId) => {
+//     try{
+      
+//         const result = await database.appDataSoure.query(
+//             `
+//             select 
+//                 name,
+//                 price
+//             from seat_class 
+//             `
+//         )
+//         return result;
+//     }catch(error){
+//         console.log(error)
+//         throw error;
+//     }
+// }
 
 
 // 공연 정보 이미지 업로드
@@ -296,7 +304,8 @@ const dashboardCancel = async(reservationId, userId) => {
 module.exports = {
     selectList,
     updateList,
-    seatList,
+    actorInfo,
+    // seatList,
     uploadImage,
     selectImage,
     deleteList,

@@ -24,7 +24,7 @@ const selectList = async() => {
 }
 
 
-// 공연 정보 불러오기
+// 공연 정보 불러오기(item)
 const updateList = async(itemId) => {
     try{
       
@@ -36,12 +36,16 @@ const updateList = async(itemId) => {
                 i.running_time as runningTime,
                 i.viewer_age as viewerAge,
                 i.price as price,
-                i.item_notice as itemNotice
+                i.item_notice as itemNotice,
+                c.name as categoryName,
+                l.name as locationName
             FROM items i
+            JOIN categories c ON i.category_id = c.id
+            JOIN locations_items li ON i.id = li.item_id 
+           	JOIN locations l ON li.location_id = l.id 
             where i.id = ?;
             `,[itemId]
         )
-        console.log(result)
         return result;
     }catch(error){
         console.log(error)
@@ -49,6 +53,7 @@ const updateList = async(itemId) => {
     }
 }
 
+// 출연자 정보 불러오기
 const actorInfo = async(itemId) => {
     try{
         const result = await database.appDataSoure.query(
@@ -57,6 +62,24 @@ const actorInfo = async(itemId) => {
                 name as actorName
             FROM actors
             WHERE item_id = ?  
+            `,[itemId]
+        )
+        return result
+    }catch(error){
+        throw error;
+    }
+}
+
+// 공연 옵션 불러오기
+const itemOption = async(itemId) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+            SELECT 
+                DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate,
+                DATE_FORMAT(event_time, '%H:%i') AS eventTime
+            FROM item_options
+            WHERE item_id = ? 
             `,[itemId]
         )
         return result
@@ -305,6 +328,7 @@ module.exports = {
     selectList,
     updateList,
     actorInfo,
+    itemOption,
     // seatList,
     uploadImage,
     selectImage,

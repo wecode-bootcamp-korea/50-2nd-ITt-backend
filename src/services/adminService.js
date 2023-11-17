@@ -23,48 +23,24 @@ const updateList = async(itemId) => {
         // 출연자 정보 불러오기
         const actorInfo = await adminDao.actorInfo(itemId);
 
+        // 공연 시간 불러오기
+        const itemOption = await adminDao.itemOption(itemId);
+
+
         // 공연 정보 + 출연자 정보
         const result = {
             itemInfo,
-            actorInfo
+            actorInfo,
+            itemOption
         }
 
-        
-
+        console.log(result);
         return result;
-
-        // // 좌석 정보 불러오기
-        // const seatInfo = await adminDao.seatList();
-
-        // 공연 정보와 좌석 정보 가공
-        // const modifiedItemInfo = itemInfo.map(item => {
-        //     // eventDate가 Date 객체인지 확인하고 ISO 문자열로 변환 후 날짜 부분만 추출
-        //     const eventDate = item.eventDate instanceof Date ? item.eventDate.toISOString().split('T')[0] : item.eventDate;
-
-        //     return {
-        //         ...item,
-        //         eventDate 
-        //     };
-        // });
-
-        // // 좌석 금액의 소수점 제거
-        // const modifiedSeatInfo = seatInfo.map(seat => ({
-        //     ...seat,
-        //     price: parseInt(seat.price).toString() // 문자열에서 소수점 제거
-        //   }));
-
-
-        // const result = {    
-        //     itemInfo,
-        //     seatInfo
-        // }
-
-        // return result;
+        
     }catch(error){
         throw error;
     }
 }
-
 
 // 공연 이미지 업로드
 const uploadImage = async(itemId, imageUrl) => {

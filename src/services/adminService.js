@@ -43,15 +43,22 @@ const updateList = async(itemId) => {
 }
 
 // 공연 이미지 업로드
-const uploadImage = async(itemId, imageUrl) => {
+const updateReserveList = async(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl) => {
 
     try{
-        //공연 ID를 통해 해당 공연의 이미지 업로드
-        const uploadImage = await adminDao.uploadImage(imageUrl, itemId);
+
+        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl)
+        
+        
+        // 공연 ID를 통해 해당 공연의 이미지 업로드
+
+        const updateItems = await adminDao.updateReserveList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
 
         if(uploadImage.affectedRows === 0){
-            throw new Error("update_image_fail");
+            throw new Error("update_reserveInfo_fail");
         }
+
+        const updateCategoryName = adminDao.updateCategoryName()
         
         //업로드된 이미지 반환
         const selectImage =  await adminDao.selectImage(itemId);
@@ -188,7 +195,7 @@ const dashboardCancel = async(userId, reservationId, price) => {
 module.exports = {
     selectList,
     updateList,
-    uploadImage,
+    updateReserveList,
     deleteList,
     addList,
     dashboardList,

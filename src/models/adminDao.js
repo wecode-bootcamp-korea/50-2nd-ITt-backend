@@ -1,20 +1,15 @@
 const database = require("../utils/database");
 
 
-// 관리자 페이지의 리스트 추가
+// 관리자 페이지의 공연 리스트 불러오기
 const selectList = async() => {
-
     try{
         const result = await database.appDataSoure.query(
             `
-            SELECT 
-                i.id as userId,
-                i.title as title,
-                c.name as categoryName,
-                i.item_notice 
-            from categories c 
-                join items i on c.id = i.category_id 
-            order by c.id desc;
+                SELECT 
+                    id,
+                    title
+                FROM items;
             `
         )
         return result;
@@ -109,16 +104,18 @@ const itemOption = async(itemId) => {
 
 
 // 공연 정보 이미지 업로드
-const uploadImage = async(imageUrl, itemId) => {
+const updateReserveList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId) => {
+
+// console.log(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId)
     try{
-      
         const result = await database.appDataSoure.query(
             `
                 UPDATE items
-                SET image = ?
+                    SET title =?, running_time = ?, viewer_age = ?, price = ?,  item_notice = ?, image = ?
                 WHERE id = ? 
-            `,[imageUrl, itemId]
+            `,[title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId]
         )
+        console.log(result)
         return result;
     }catch(error){
         console.log(error)
@@ -128,15 +125,14 @@ const uploadImage = async(imageUrl, itemId) => {
 
 
 // 공연 정보 이미지 가져오기
-const selectImage = async(itemId) => {
+const updateCategoryName = async(itemId) => {
     try{
       
         const result = await database.appDataSoure.query(
             `
-                SELECT 
-                    image
-                FROM items
-                    WHERE id = ?
+            UPDATE categorise
+                SET name = ?
+            WHERE id = ? 
             `,[itemId]
         )
 
@@ -145,6 +141,26 @@ const selectImage = async(itemId) => {
         console.log(error)
         throw error;
     }
+}
+
+// 공연 정보 이미지 가져오기
+const selectImage = async(itemId) => {
+    // try{
+      
+    //     const result = await database.appDataSoure.query(
+    //         `
+    //             SELECT 
+                    
+    //             FROM items
+    //                 WHERE id = ?
+    //         `,[itemId]
+    //     )
+
+    //     return result;
+    // }catch(error){
+    //     console.log(error)
+    //     throw error;
+    // }
 }
 
 
@@ -330,7 +346,8 @@ module.exports = {
     actorInfo,
     itemOption,
     // seatList,
-    uploadImage,
+    updateReserveList,
+    updateCategoryName,
     selectImage,
     deleteList,
     addList,

@@ -33,40 +33,43 @@ const updateList = async(req, res) => {
     }
 }
 
-// 공연 이미지 업로드
-const uploadImage = async(req, res) => {
+// 공연 내용 수정 및 이미지 업로드
+const updateReserveList = async(req, res) => {
 
     try{
-        const itemId = req.body.itemId;
-        const itemImages = req.file;
+        const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime  } = req.body;
+        const itemImage = req.file;
 
-        if(!itemId || !itemImages){
+        if(!itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !itemImage){
             throw new Error("key_error");
         }
 
         // AWS S3 이미지 업로드 
-        const uploadResult = await imageUpload.itemImageUpload(itemImages); //이미지 업로드
-        const imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
+        let uploadResult = ""
+        let imageUrl = ""
+
+        if(itemImage){
+            uploadResult = await imageUpload.itemImageUpload(itemImage); //이미지 업로드
+            imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
+        }
 
         // itemId와 이미지 URL 넘기기
-        const result = await adminService.uploadImage(itemId, imageUrl)
+        const result = await adminService.updateReserveList(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl)
 
         return res.json({data : "update_success", message : result});
 
     }catch(error){
+        console.log(error);
 
         if(error.message === "key_error"){
-            return req.json({data : "key_error"});
+            return res.json({data : "key_error"});
         }
         
-        if(error.messasge === "update_image_fail"){
-            return req.json({data : "update_image_fail"});
+        if(error.messasge === "update_reserveInfo_fail"){
+            return res.json({data : "update_reserveInfo_fail"});
         }
 
-        return req.json({data : "발생할 에러가 더 있을수 있다 리펙토링하면서 추가할게요"});
-
-
-        throw error
+        return res.json({data : "발생할 에러가 더 있을수 있다 리펙토링하면서 추가할게요"});
     }
 }
 
@@ -175,7 +178,7 @@ const dashboardCancel = async(req, res) => {
 module.exports = {
     selectList,
     updateList,
-    uploadImage,
+    updateReserveList,
     deleteList,
     addList,
     dashboardList,

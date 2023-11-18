@@ -84,6 +84,7 @@ const profileUpdate = async(req, res) =>{
     
     console.log(profileImage);
 
+
     try{
         if( !userName && !profileImage  && !userTokenDecode){
             throw new Error("key_error");

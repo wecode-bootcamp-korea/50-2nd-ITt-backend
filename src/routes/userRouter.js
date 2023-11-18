@@ -13,7 +13,7 @@ router.get("/mypage", verfiyToken.verfiyToken, userController.userInfo)
 router.post("/mypage/cancel", verfiyToken.verfiyToken, userController.orderCancel);
 
 //mypage 프로필 수정
-router.put("/mypage/update", upload, verfiyToken.verfiyToken, userController.profileUpdate);
+router.post("/mypage/update", upload, verfiyToken.verfiyToken, userController.profileUpdate);
 
 
 module.exports = {

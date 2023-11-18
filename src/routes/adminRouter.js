@@ -4,26 +4,26 @@ const adminController = require("../controllers/adminController");
 const multer = require("multer");
 const uploadImage = multer({dest : "itemImage/"}).single("itemImage");
 
-// 공연 정보 전부 끌고오기
+// 공연 정보 리스트
 router.get("/selectList", adminController.selectList);
 
-// 공연 정보 우측에 수정 버튼 클릭 했을시
-router.get("/updateList/:itemId", adminController.updateList);
+// 공연 정보 상세
+router.get("/selectItemList/:itemId", adminController.selectItemList);
 
 // 공연 정보 수정
-router.put("/updateReserveList", uploadImage, adminController.updateReserveList);
+router.put("/updateItemList", uploadImage, adminController.updateItemList);
 
-// // 공연 삭제 버튼 클릭 했을 시
-// router.delete("/deleteList", adminController.deleteList);
+// 공연 정보 삭제
+router.delete("/deleteItemList", adminController.deleteItemList)
 
-// // 공연 추가 버튼 클릭 했을 시
-// router.post("/addList", uploadImage, adminController.addList);
+// 공연 정보 추가
+router.post("/insertItemList", uploadImage, adminController.insertItemList);
 
-// // 대시보드 탭을 눌렀을 시
-// router.get("/dashboardList", adminController.dashboardList);
+// 구매 내역 조회
+router.get("/selectOrderList", adminController.selectOrderList);
 
-// // 대시보드 공연 예약 취소
-// router.post("/dashboardCancel", adminController.dashboardCancel);
+// 구매 내역 취소
+router.post("/deleteOrderList", adminController.deleteOrderList);
 
 module.exports = {
     router

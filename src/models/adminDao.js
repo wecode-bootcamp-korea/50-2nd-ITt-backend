@@ -103,6 +103,24 @@ const itemOption = async(itemId) => {
     }
 }
 
+// 카테고리 정보 불러오기
+const categoryInfo = async() => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT 
+                    id as categoryId,
+                    name as categoryName
+                FROM categories
+            `
+        )
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error
+    }
+}
+
 
 // 공연 정보 및 이미지 업로드
 const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId) => {
@@ -491,13 +509,16 @@ const selectOrderList = async () => {
                 DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate,
                 DATE_FORMAT(event_time, '%H:%i') AS eventTime,
                 r.status as status,
-                r.amount as amount
+                r.amount as amount,
+                s.seat_row as seatRow,
+                s.seat_col as seatCol
             FROM reservations r 
                 JOIN users u ON r.user_id = u.id 
                 JOIN items i ON r.item_id = i.id 
                 JOIN item_options io ON r.item_options_id = io.id 
+                JOIN seats s ON r.seat_id = s.id 
             WHERE status ="complete"
-            `
+         `
         )
         return result
     }catch(error){
@@ -533,7 +554,7 @@ const cancelSeat = async (seatId) => {
         const result = await database.appDataSoure.query(
             `
                 UPDATE seats
-                    SET is_booked = 1
+                    SET is_booked = 0
                 WHERE id = ?
             `,[seatId]
         )
@@ -606,20 +627,21 @@ module.exports = {
 
     // 리스트
     selectList, // 공연 전체 리스트 조회
-    selectItemList,
-    actorInfo,
-    itemOption,
-    deleteItemList,
+    selectItemList, // 공연 상세 정보 조회
+    actorInfo, // 출연자 정보 조회
+    itemOption, // 공연 옵션 정보
+    categoryInfo, // 카테고리 정보 불러오기
+    deleteItemList, // 공연 정보 삭제
 
-
-    updateItemList,
-    selectCategoryIdInfo,
-    updateCategoryName,
-    selectLocationId,
-    updatelocationName,
-    deleteActorName,
-    updateActorName,
-    updateEventDate,
+    // 공연 정보 변경
+    updateItemList, // 공연 정보 변경
+    selectCategoryIdInfo, // 카테고리 정보 조회
+    updateCategoryName, // 카테고리 이름 변경
+    selectLocationId, // 공연장 정보 조회
+    updatelocationName, // 공연장 이름 변경
+    deleteActorName, // 출연자 삭제
+    updateActorName, // 출연자 추가
+    updateEventDate, // 공연 시간 및 날짜 변경
     
     // 공연 삭제
     deleteActor, // 출연자 삭제

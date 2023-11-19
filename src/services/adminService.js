@@ -57,12 +57,17 @@ const selectItemList = async(adminUserInfo, itemId) => {
             if(itemOption.length === 0){
                 throw new Error("item_infomation_not_found")
             }
+        
+        // 카테고리 정보 불러오기
+        const categoryInfo = await adminDao.categoryInfo();
+        console.log(categoryInfo);
 
         // 공연 정보 + 출연자 정보
         const result = {
             itemInfo,
             actorInfo,
-            itemOption
+            itemOption,
+            categoryInfo
         }
         return result;
         
@@ -88,6 +93,14 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
             }
         
         // 공연 ID를 통해 해당 공연의 이미지 업로드
+        if(title || runningTime || viewerAge || price || itemNotice || imageUrl || itemId){
+            const updateItems = await adminDao.updateItemList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
+
+            if(updateItems.affectedRows === 0){
+                throw new Error("update_fail");
+            }
+        }
+
         const updateItems = await adminDao.updateItemList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
 
         if(updateItems.affectedRows === 0){
@@ -350,13 +363,14 @@ const deleteOrderList = async(adminUserInfo, reservationId) => {
 
 
 module.exports = {
+// 리스트
     selectList,
     selectItemList,
     updateItemList,
     deleteItemList,
     insertItemList,
 
-///대시보드///
+// 대시보드
     selectOrderList,
     deleteOrderList
 }

@@ -70,7 +70,7 @@ const updateItemList = async(req, res) => {
 
         console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime , eventId )
         
-        if(!adminUserInfo|| !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !eventId || !itemImage ){
+        if(!adminUserInfo || !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !eventId || !itemImage ){
             throw new Error("key_error");
         }
 
@@ -110,6 +110,7 @@ const deleteItemList = async(req, res) => {
     try{
         //디코된 유저의 토큰 정보 불러오기
         const adminUserInfo = req.user;
+        
         // 공연 아이디 받기
         const itemId = req.params.itemId
 
@@ -245,14 +246,14 @@ const deleteOrderList = async(req, res) => {
 }
 
 module.exports = {
+// 리스트 
     selectList,
     selectItemList,
     updateItemList,
     deleteItemList,
     insertItemList,
 
-//////////////////////대시보드///////////////////
-
+// 대시보드
     selectOrderList,
     deleteOrderList
 }

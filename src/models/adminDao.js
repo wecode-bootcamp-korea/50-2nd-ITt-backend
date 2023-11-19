@@ -1,5 +1,25 @@
 const database = require("../utils/database");
 
+// 유저 검증
+const selectAdminInfo = async(userId, userEmail) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT
+                    id,
+                    email
+                FROM users
+                WHERE id = ? AND email = ?
+            `,[userId, userEmail]
+        )
+        return result
+    }catch(error){
+        console.log(error);
+        return error;
+    }
+}
+
+
 
 // 관리자 페이지의 공연 리스트 불러오기
 const selectList = async() => {
@@ -7,7 +27,7 @@ const selectList = async() => {
         const result = await database.appDataSoure.query(
             `
                 SELECT 
-                    id,
+                    id as itemId,
                     title
                 FROM items;
             `
@@ -477,13 +497,10 @@ const selectOrderList = async () => {
                 JOIN items i ON r.item_id = i.id 
                 JOIN item_options io ON r.item_options_id = io.id 
             WHERE status ="complete"
-        
-        
             `
         )
         return result
     }catch(error){
-        console.log(error)
         throw error;
     }
 }
@@ -495,12 +512,13 @@ const selectReservationInfo = async (reservationId) => {
             `
                 SELECT
                     id as reservationId,
+                    user_id as userId,
                     seat_id as seatId,
                     amount,
                     status
                 FROM reservations
                 WHERE id = ?
-            `,[reservationId]
+            `, [reservationId]
         )
         return result
     }catch(error){
@@ -583,7 +601,11 @@ const updateUsersCredit = async(totalCredit, userId) => {
 
 
 module.exports = {
-    selectList,
+    // 공통
+    selectAdminInfo, // admin 유저 조회
+
+    // 리스트
+    selectList, // 공연 전체 리스트 조회
     selectItemList,
     actorInfo,
     itemOption,

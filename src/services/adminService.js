@@ -3,10 +3,22 @@ const adminDao = require("../models/adminDao");
 const { Route53RecoveryCluster, ImportExport } = require("aws-sdk");
 
 // 관라지 페이지의 리스트
-const selectList = async() => {
+const selectList = async(adminUserInfo) => {
     try{
-        const select = await adminDao.selectList();
-        if(r)
+
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
+
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
+        
+        // 공연 리스트 불러오기
+        const result = await adminDao.selectList();
+
         return result
 
     }catch(error){
@@ -15,18 +27,36 @@ const selectList = async() => {
 }
 
 // 관리자 상품 리스트 상세 정보 불러오기
-const selectItemList = async(itemId) => {
+const selectItemList = async(adminUserInfo, itemId) => {
 
     try{
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
+
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
+
         // 공연 정보 불러오기
         const itemInfo = await adminDao.selectItemList(itemId);
+            if(itemInfo.length === 0){
+                throw new Error("item_infomation_not_found")
+            }
 
         // 출연자 정보 불러오기
         const actorInfo = await adminDao.actorInfo(itemId);
+            if(actorInfo.length === 0){
+                throw new Error("item_infomation_not_found")
+            }
 
         // 공연 시간 불러오기
         const itemOption = await adminDao.itemOption(itemId);
-
+            if(itemOption.length === 0){
+                throw new Error("item_infomation_not_found")
+            }
 
         // 공연 정보 + 출연자 정보
         const result = {
@@ -41,13 +71,23 @@ const selectItemList = async(itemId) => {
     }
 }
 
-// 공연 이미지 업로드
-const updateItemList = async(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl) => {
+// 공연 정보 수정
+const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl) => {
 
     try{
         console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl)
-        // 공연 ID를 통해 해당 공연의 이미지 업로드
 
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
+
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
+        
+        // 공연 ID를 통해 해당 공연의 이미지 업로드
         const updateItems = await adminDao.updateItemList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
 
         if(updateItems.affectedRows === 0){
@@ -92,66 +132,86 @@ const updateItemList = async(itemId, title, runningTime, viewerAge, price, itemN
                 throw new Error("update_fail");
             }
 
-        const updateActorName = await adminDao.updateActorName(actorName, itemId);
+        let updateActorName = ""
+            for(let i = 0; i < actorName.length; i++){  // 복수의 출연자 업데이트 
+                updateActorName = await adminDao.updateActorName(actorName[i], itemId);
+            }
             if(updateActorName.affectedRows === 0){
                 throw new Error("update_fail");
             }
-        // // 업데이트 된 공연 정보 반환
-        // const result = await adminDao.updateItemList(itemId);
+
         
         return true;
         
     }catch(error){
-        console.log(error)
+        console.log(error);
         throw error
     }
 }
 
 // 공연 삭제
-const deleteItemList = async(itemId) => {
+const deleteItemList = async(adminUserInfo, itemId) => {
     try{
 
-    // 출연자 삭제
-        const deleteActor = await adminDao.deleteActor(itemId);
-        if(deleteActor.affectedRows === 0){
-            throw new Error("delete_fail")
-        }
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
 
-    // 공연 옵션 삭제
-        const deleteItemOption = await adminDao.deleteItemOption(itemId)
-        if(deleteItemOption.affectedRows === 0){
-            throw new Error("delete_fail")
-        }
-
-    // 공연 지역 연결 삭제
-        const deleteLocationOption = await adminDao.deleteLocationOption(itemId);
-        if(deleteLocationOption.affectedRows === 0){
-            throw new Error("delete_fail")
-        }
-
-    // 공연 삭제하기
-        const deleteItemList = await adminDao.deleteItemList(itemId);
-        if(deleteItemList.affectedRows === 0){
-            throw new Error("delete_fail")
-        }
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
         
-        return true;
+        // 출연자 삭제
+            const deleteActor = await adminDao.deleteActor(itemId);
+                if(deleteActor.affectedRows === 0){
+                    throw new Error("delete_fail")
+                }
+
+        // 공연 옵션 삭제
+            const deleteItemOption = await adminDao.deleteItemOption(itemId)
+                if(deleteItemOption.affectedRows === 0){
+                    throw new Error("delete_fail")
+                }
+
+        // 공연 지역 연결 삭제
+            const deleteLocationOption = await adminDao.deleteLocationOption(itemId);
+                if(deleteLocationOption.affectedRows === 0){
+                    throw new Error("delete_fail")
+                }
+
+        // 공연 삭제하기
+            const deleteItemList = await adminDao.deleteItemList(itemId);
+                if(deleteItemList.affectedRows === 0){
+                    throw new Error("delete_fail")
+                }
+            
+            return true;
     }catch(error){
-        console.log(error);
         throw error;
     } 
 }
 
 // 공연 추가
-const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl) => {
+const insertItemList = async(adminUserInfo, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl) => {
     try{
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
+
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
 
         // 카테고리 정보 불러오기
         const selectCategoryInfo = await adminDao.selectCategoryInfo(categoryName); // 카테고리 정보 가져오기
         const categoryId = selectCategoryInfo[0].id; // 카테고리 아이디 담기
 
         // 공연 정보 추가
-        const selectItemInfo = await adminDao.selectItemInfo(title); // 공연 정보 불러
+        const selectItemInfo = await adminDao.selectItemInfo(title); // 공연 정보 불러오기
             if(selectItemInfo.length !== 0){
                 throw new Error("insert_fail")
             }
@@ -164,10 +224,14 @@ const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, c
                 throw new Error("insert_fail")
             }
         const itemId = selectItemId[0].id; // 추가된 공연정보의 title을 토대로 id를 받아 변수에 넣기
-        const insertActor = await adminDao.insertActor(actorName ,itemId);
-            if(insertActor.affectedRows === 0){
-                throw new Error("insert_fail")
-            }
+        
+        let insertActor = ""
+        for(let i = 0; i < actorName.length; i++){ // 배열로 받아온 출연자 업로드
+            insertActor = await adminDao.insertActor(actorName[i] ,itemId);
+                if(insertActor.affectedRows === 0){
+                    throw new Error("insert_fail")
+                }
+        }
 
         // 시간 추가
         const insertEventDateTime = await adminDao.insertEventDateTime(eventDate, eventTime, itemId);
@@ -184,14 +248,13 @@ const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, c
         const locationId = selectLocationInfo[0].id; // 불러온 정보를 토대로 ID 변수에 넣기
     
         const insertLocationItem = await adminDao.insertLocationItem(locationId, itemId); // 공연장 아이템 아이디와 등록한 공연장의 id 정보를 삽입
-        if(insertLocationItem.affectedRows === 0){
-            throw new Error("insert_fail")
-        }
+            if(insertLocationItem.affectedRows === 0){
+                throw new Error("insert_fail")
+            }
     
         return true;
 
     }catch(error){
-        console.log(error)
         throw error
     }
 }
@@ -199,8 +262,18 @@ const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, c
 //////////////////////////////////////////////대시보드///////////////////////////////////////////
 
 // 대시보드 리스트 불러오기
-const selectOrderList = async () => {
+const selectOrderList = async (adminUserInfo) => {
     try{
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
+
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
+
         const result = await adminDao.selectOrderList();
 
         // price의 부동소수점 제거하기
@@ -216,20 +289,35 @@ const selectOrderList = async () => {
 
 
 // 대시보드 공연 예약 취소
-const deleteOrderList = async(reservationId) => {
+const deleteOrderList = async(adminUserInfo, reservationId) => {
     try{
+        //admin 유저 조회 및 검증
+        const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
+        const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
 
-        const userId = 1;
+        // 유저 정보를 토대로 DB에 저장되어있는지 확인
+        const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
+            if(selectAdminInfo.length === 0){
+                throw new Error("admin_user_not_found")
+            }
 
         // 공연 예약 정보 불러오기
         const selectReservationInfo = await adminDao.selectReservationInfo(reservationId); 
+            if(selectReservationInfo.length === 0){
+                throw new Error("cancel_fail")
+            }
+
         const seatId = selectReservationInfo[0].seatId;
         
-        // 좌석 예약 상태 변경
+        // // 좌석 예약 상태 변경
         const cancelSeat = await adminDao.cancelSeat(seatId)
             if(cancelSeat.affectedRows === 0){
                 throw new Error("cancel_fail")
             }
+
+        // 주문한 유저 정보 가져오기
+        const selectUserInfo = await adminDao.selectReservationInfo(reservationId);
+        const userId = selectUserInfo[0].userId; // 받아온 유저 정보에서 주문에 대한 유저ID 가져와 변수에 담기
 
         // 주문 상태 변경
         const updateStatus = await adminDao.updateStatus(reservationId, userId)
@@ -252,7 +340,7 @@ const deleteOrderList = async(reservationId) => {
            if(updateUsersCredit.affectedRows === 0){
                 throw new Error("cancel_fail");
            }
-           return true;
+        return true;
 
     }catch(error){
         console.log(error);

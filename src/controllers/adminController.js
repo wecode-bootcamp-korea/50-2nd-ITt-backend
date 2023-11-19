@@ -3,49 +3,74 @@ const adminService = require("../services/adminService");
 const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
 const { join } = require("path");
-const { ConnectContactLens, Redshift } = require("aws-sdk");
 const { ifError } = require("assert");
+const { error } = require("console");
+const { SimpleConsoleLogger } = require("typeorm");
 
 // 관라지 페이지 공연 리스트 불러오기
 const selectList = async(req, res) => { 
     try{
-        const result = await adminService.selectList();
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
+
+        if(!adminUserInfo){
+            throw new Error("key_error");
+        }
+
+        const result = await adminService.selectList(adminUserInfo);
         return res.json({data : result});
 
     }catch(error){
-        throw error;
+        console.log(error);
+        
+        if(error.message === "key_error"){
+            return res.json({message : "key_error"});
+        }
+
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"})
+        }
     }
 } 
 
 // 공연 상세정보 불러오기
 const selectItemList = async(req, res) => {
     try{
-        const itemId = req.params.itemId // 공연에 대한 id 값 받아오기
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
 
-        if(!itemId){
+        // 공연에 대한 id 값 받아오기
+        const itemId = req.params.itemId 
+
+        if(!adminUserInfo || !itemId){
             throw new Error("key_error");
         }
 
-        const result = await adminService.selectItemList(itemId)
+        const result = await adminService.selectItemList(adminUserInfo, itemId)
         return res.json({data : result});
 
     }catch(error){
-        console.log(error)
-        throw error
+        console.log(error);
+        if(error.message === "key_error"){
+            return res.json({message : "key_error"})
+        }
+        if(error.message === "item_infomation_not_found"){
+            return res.json({message : "item_infomation_not_found"})
+        }
     }
 }
 
 // 공연 내용 수정 및 이미지 업로드
 const updateItemList = async(req, res) => {
-
     try{
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
         const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime , eventId  } = req.body;
         const itemImage = req.file;
 
-
         console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime , eventId )
-
-        if(!itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !eventId || !itemImage ){
+        
+        if(!adminUserInfo|| !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !eventId || !itemImage ){
             throw new Error("key_error");
         }
 
@@ -58,7 +83,7 @@ const updateItemList = async(req, res) => {
             imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
         }
 
-        const result = await adminService.updateItemList(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl)
+        const result = await adminService.updateItemList(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl)
         
         if(result !== true){
             throw new Error("update_fail");
@@ -70,21 +95,29 @@ const updateItemList = async(req, res) => {
             return res.json({message : "key_error"});
         }
         
-        if(error.message === "update_fail")
+        if(error.message === "update_fail"){
             return res.json({message : "update_fail"});
+        }
+
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"});
+        }
     }
 }
 
 // 공연 삭제
 const deleteItemList = async(req, res) => {
     try{
-        const itemId = req.query.id;
-        
-        if(!itemId){
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
+        // 공연 아이디 받기
+        const itemId = req.params.itemId
+
+        if(!adminUserInfo || !itemId){
             throw new Error("key_error");
         }
 
-        const result = await adminService.deleteItemList(itemId)
+        const result = await adminService.deleteItemList(adminUserInfo, itemId)
 
         if(result !== true){
             throw new Error("delete_fail");
@@ -93,7 +126,7 @@ const deleteItemList = async(req, res) => {
         return res.json({date : "delete_success"})
 
     }catch(error){
-
+        console.log(error)
         if(error.message === "key_error"){
             return res.json({message : "key_error"})
         }
@@ -102,15 +135,22 @@ const deleteItemList = async(req, res) => {
             return res.json({message : "delete_fail"})
         }
 
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"})
+        }
     }
 }
 //공연 추가
 const insertItemList = async(req, res) => {
     try{
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
         const { title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime  } = req.body;
         const itemImage = req.file;
 
-        if(!title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !itemImage){
+        console.log(title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, itemImage)
+
+        if(!adminUserInfo || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !itemImage){
             throw new Error("key_error");
         }
 
@@ -123,7 +163,7 @@ const insertItemList = async(req, res) => {
                 imageUrl = uploadResult.Location; 
             }
 
-        const result = await adminService.insertItemList(title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl);
+        const result = await adminService.insertItemList(adminUserInfo, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, imageUrl);
         
         if(result !== true){
             throw new Error("insert_fail")
@@ -141,7 +181,12 @@ const insertItemList = async(req, res) => {
         if(error.message === "insert_fail"){
             return res.json({message : "insert_fail"})
         }
+
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"})
+        }
     }
+
 }
 
 //////////////////////////////////////////////대시보드////////////////////////////////////////////
@@ -149,26 +194,40 @@ const insertItemList = async(req, res) => {
 // 대시보드 공연 예약 리스트 불러오기
 const selectOrderList = async (req, res) => {
     try{
-        const result = await adminService.selectOrderList();
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
+        
+        if(!adminUserInfo){
+            throw new Error("key_error");
+        }
+        const result = await adminService.selectOrderList(adminUserInfo);
         return res.json({data : result});
         
     }catch(error){
-        return res.json({message : error});
+        if(error.message === "key_error"){
+            return res.json({message : "key_error"});
+        }
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"})
+        }
+
     }
 }
 
 // 대시보드 공연 예약 취소
 const deleteOrderList = async(req, res) => {
-
     try{
-        const {reservationId} = req.body;
-        
-        if(!reservationId){
+        //디코된 유저의 토큰 정보 불러오기s
+        const adminUserInfo = req.user;
+
+        // 예약 정보의 ID 불러오기
+        const reservationId = req.params.reservationId;
+
+        if(!adminUserInfo || !reservationId){
             throw new Error("key_error");
         }
+        const result = await adminService.deleteOrderList(adminUserInfo, reservationId);
 
-        const result = await adminService.deleteOrderList(reservationId);
-        
         if(result !== true){
             throw new Error("cancel_fail");
         }

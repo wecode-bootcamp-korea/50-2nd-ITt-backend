@@ -5,12 +5,14 @@ const userDao = require("../models/userDao")
 const userInfo = async(userTokenDecode) => {
 
     try{
+        //토큰의 유저 ID, Email 가져오기
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
         const result = await userDao.userInfo(userId);
 
         return result;
+
     }catch(error){
         console.log(error);
         throw error
@@ -92,7 +94,6 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
 //mypage 프로필 수정
 const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
     try{
-
         //유저정보
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;

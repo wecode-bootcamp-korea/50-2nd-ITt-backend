@@ -54,7 +54,7 @@ const selectItemList = async(itemId) => {
                 i.item_notice as itemNotice,
                 c.name as categoryName,
                 l.name as locationName
-            FROM items iv
+            FROM items i
             JOIN categories c ON i.category_id = c.id
             JOIN locations_items li ON i.id = li.item_id 
            	JOIN locations l ON li.location_id = l.id 

@@ -79,10 +79,10 @@ const selectItemList = async(adminUserInfo, itemId) => {
 }
 
 // 공연 정보 수정
-const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl) => {
+const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl) => {
 
     try{
-        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, eventId, imageUrl)
+        console.log(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl)
 
         //admin 유저 조회 및 검증
         const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
@@ -128,23 +128,23 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
                 throw new Error("update_fail");
             }
     
-        // 공연 시간 업데이트
-        let updateEventTime = ""
-        for(let i = 0; i < eventTime.length; i++){
-            updateEventTime = await adminDao.updateEventTime(eventTime[i], eventId[i], itemId);
-                if(updateEventTime.affectedRows === 0){
-                    throw new Error("update_fail");
-                }
-        }
+        // // 공연 시간 업데이트
+        // let updateEventTime = ""
+        // for(let i = 0; i < eventTime.length; i++){
+        //     updateEventTime = await adminDao.updateEventTime(eventTime[i], eventId[i], itemId);
+        //         if(updateEventTime.affectedRows === 0){
+        //             throw new Error("update_fail");
+        //         }
+        // }
         
-        // 공연 날짜 업데이트
-        let updateEventDate = ""
-        for(let i = 0; i < eventDate.length; i++){
-            updateEventDate = await adminDao.updateEventDate(eventDate[i], eventId[i], itemId)
-                if(updateEventDate.affectedRows === 0){
-                    throw new Error("update_fail");
-                }
-        }
+        // // 공연 날짜 업데이트
+        // let updateEventDate = ""
+        // for(let i = 0; i < eventDate.length; i++){
+        //     updateEventDate = await adminDao.updateEventDate(eventDate[i], eventId[i], itemId)
+        //         if(updateEventDate.affectedRows === 0){
+        //             throw new Error("update_fail");
+        //         }
+        // }
 
         // 출연자 업데이트
         const deleteActorName = adminDao.deleteActorName(itemId); // 아이템아이디 해당하는 전체 유저를 삭제 후 새로 추가

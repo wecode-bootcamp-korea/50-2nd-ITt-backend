@@ -65,30 +65,30 @@ const updateItemList = async(req, res) => {
     try{
         //디코된 유저의 토큰 정보 불러오기
         const adminUserInfo = req.user;
-        const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventInfo } = req.body;
+        const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName } = req.body;
         const itemImage = req.file;
 
-        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventInfo )
+        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName )
         
-        // if(!adminUserInfo || !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventInfo || !itemImage ){
-        //     throw new Error("key_error");
-        // }
+        if(!adminUserInfo || !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !itemImage ){
+            throw new Error("key_error");
+        } 
 
-        // // AWS S3 이미지 업로드 
-        // let uploadResult = ""
-        // let imageUrl = ""
+        // AWS S3 이미지 업로드 
+        let uploadResult = ""
+        let imageUrl = ""
 
-        // if(itemImage){
-        //     uploadResult = await imageUpload.itemImageUpload(itemImage); //이미지 업로드
-        //     imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
-        // }
+        if(itemImage){
+            uploadResult = await imageUpload.itemImageUpload(itemImage); //이미지 업로드
+            imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
+        }
 
-        // const result = await adminService.updateItemList(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventInfo, imageUrl)
+        const result = await adminService.updateItemList(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl)
         
-        // if(result !== true){
-        //     throw new Error("update_fail");
-        // }
-        // return res.json({message : "update_success"});
+        if(result !== true){
+            throw new Error("update_fail");
+        }
+        return res.json({message : "update_success"});
 
     }catch(error){
         if(error.message === "key_error"){

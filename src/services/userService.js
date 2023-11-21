@@ -10,7 +10,6 @@ const { throwError } = require('../utils/error');
 const e = require('express');
 dotenv.config()
 
-
 const adminsignup = async (data) => {
     const { email, password, kakao_id, name, is_admin } = data
     const saltRounds = 10;
@@ -23,7 +22,6 @@ const kakaologin = async (code) => {
 
   const authToken = await kakao.accessToken(code)
   const response = authToken;
-
     if (!response || response.status !== 200) {
       error.throwError(400,'KAKAO CONNECTION ERROR');
     }
@@ -49,13 +47,13 @@ const kakaologin = async (code) => {
         phone_number
       );
       
-    const userSearch = await userDao.getUserByEmail(email);
+    const [userSearch] = await userDao.getUserByEmail(email);
 
-    const dbUserId = userSearch[0].id
-    const dbUserEmail = userSearch[0].email
-    const dbUserName = userSearch[0].name
-    const isAdmin = userSearch[0].is_admin
-    const profileImage = userSearch[0].profile_image 
+    const dbUserId = userSearch.id
+    const dbUserEmail = userSearch.email
+    const dbUserName = userSearch.name
+    const isAdmin = userSearch.is_admin
+    const profileImage = userSearch.profile_image 
 
     const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName, isAdmin, profileImage );
 
@@ -69,13 +67,13 @@ const kakaologin = async (code) => {
         profile_image : profileImage
     };
   } else {
-    const userSearch = await userDao.getUserByEmail(email);
+    const [userSearch] = await userDao.getUserByEmail(email);
     
-    const dbUserId = userSearch[0].id;
-    const dbUserEmail = userSearch[0].email;
-    const dbUserName = userSearch[0].name;
-    const isAdmin = userSearch[0].is_admin
-    const profileImage = userSearch[0].profile_image 
+    const dbUserId = userSearch.id;
+    const dbUserEmail = userSearch.email;
+    const dbUserName = userSearch.name;
+    const isAdmin = userSearch.is_admin
+    const profileImage = userSearch.profile_image 
 
       const token = await jwtToken.createToken(dbUserId, dbUserEmail, dbUserName, isAdmin, profileImage);
       return {

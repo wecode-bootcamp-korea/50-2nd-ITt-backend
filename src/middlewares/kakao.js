@@ -25,8 +25,6 @@ const accessToken = async(code) => {
         Authorization: `bearer ${Token}`,
         },
     });
-
-
     return response;
 }
 module.exports = {

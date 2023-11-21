@@ -66,7 +66,7 @@ const updateUserCredit = async(userTotalCredit, userId) => {
         const result = await database.appDataSoure.query(
             `
                 UPDATE users
-                SET credit = ?
+                    SET credit = ?
                 WHERE id = ?
             `,[userTotalCredit, userId]
         )

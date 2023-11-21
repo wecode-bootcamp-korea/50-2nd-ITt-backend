@@ -5,10 +5,9 @@ const imageUpload = require("../middlewares/imageUpload");
 
 // 유저 정보 불러오기
 const userInfo = async(req, res) => {
-
-    const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
-
     try{
+        // 디코드된 토큰 정보 불러오기
+        const userTokenDecode = req.user; 
         if(!userTokenDecode){
             throw new Error("key_error");
         }
@@ -24,14 +23,13 @@ const userInfo = async(req, res) => {
 
 // //mypage 주문 취소
 const orderCancel = async(req, res) => {
-
-    const reservationInfo = req.body
-    const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
-
     try{
+        const reservationInfo = req.body
+        const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
+    
         if(!reservationInfo || !userTokenDecode){ // key 검증
             throw new Error("key_error");
-        }
+        }   
 
         const result = await userService.orderCancel(reservationInfo, userTokenDecode);
 
@@ -76,19 +74,16 @@ const orderCancel = async(req, res) => {
 
 // //mypage 프로필 수정
 const profileUpdate = async(req, res) =>{
-
-    //여기서 토큰의 정보를 같이 받을거임
-    const userName = req.body.name; // 유저 이름 받기
-    const profileImage = req.file // 업로드 파일 받기
-    const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
-    
-    console.log(profileImage);
-
-
     try{
-        if( !userName && !profileImage  && !userTokenDecode){
+        //여기서 토큰의 정보를 같이 받을거임
+        const userName = req.body.name; // 유저 이름 받기
+        const profileImage = req.file // 업로드 파일 받기
+        const userTokenDecode = req.user; // 디코드된 토큰 정보 불러오기
+
+        if(!userName && !profileImage && !userTokenDecode){
             throw new Error("key_error");
         }
+
 
         // AWS S3 이미지 업로드
         let uploadResult = "" 
@@ -100,9 +95,11 @@ const profileUpdate = async(req, res) =>{
         }
 
         const result = await userService.profileUpdate(imageUrl, userTokenDecode, userName);
-        return res.json({message : "update_success", message : result[0]});
+
+        return res.json({message : "update_success", data : result[0]});
 
     }catch(error){
+        console.log(error)
         if(error.message === "key_error"){
            return res.json({message : "key_error"});
         }

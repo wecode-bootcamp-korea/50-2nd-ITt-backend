@@ -27,7 +27,6 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
-
         // 유저 데이터 크레딧 및 유저 정보 조회
         const selectUserInfo = await userDao.selectUserInfo(userId) // 토큰의 userId로 유저의 크레딧 조회
         const dbUserId = selectUserInfo[0].id; // db에 저장된 유저 id 정보
@@ -41,42 +40,44 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
             throw new Error("order_delete_error");
         }
 
-        
         // 주문 정보 조회 하기
-        let selectReserveInfo = "";
-        for(let i = 0; i < reservationInfo.data.length; i++){
-            selectReserveInfo = await userDao.selectReserveInfo(reservationInfo.data[i].reservationId, userId);
+        const reservationId = reservationInfo.reservationIds; // 주문 내역 정보 id 담기
 
-            if(selectReserveInfo.length === 0){
-                throw new Error("reservationInfo_not_found")
-            }
+        let selectReserveInfo = ""; 
+        let reservationAmount = 0; 
+
+        // 결제 금액 담기
+        for(let i = 0; i < reservationId.length; i++){
+            selectReserveInfo = await userDao.selectReserveInfo(reservationId[i], userId);
+            reservationAmount += parseInt(selectReserveInfo[0].amount, 10);
+                if(selectReserveInfo.length === 0){
+                    throw new Error("reservationInfo_not_found")
+                }
         }
+        const userCredit = selectUserInfo[0].credit; // 유저 크레딧 정보 담기
 
-         const userCredit = selectUserInfo[0].credit; // 유저 크레딧 정보 담기
-         const totalAmount = reservationInfo.data.length * reservationInfo.data[0].totalAmount // 주문 개수 * 단일 가격
-         const userTotalCredit = totalAmount + userCredit; // 결제 가격 + 유저 크레딧
-                   
+        const userTotalCredit = reservationAmount + userCredit; // 결제 가격 + 유저 크레딧
+
         // 결제 취소 분 크레딧 업데이트
         const updateUserCredit = await userDao.updateUserCredit(userTotalCredit, userId);
-
-        if(updateUserCredit.affectedRows === 0){
-            console.log("유저 크레딧 업데이트 에러");
-            throw new Error("order_delete_error")
-        }
+            if(updateUserCredit.affectedRows === 0){
+                console.log("유저 크레딧 업데이트 에러");
+                throw new Error("order_delete_error")
+            }
         
         // 주문 데이터 업데이트 -> 데이터 삭제가 아닌 status 값을 cancel로 변경
         let updateOrderStatus = ""
-        for(let i = 0; i < reservationInfo.data.length; i++){ // 주문 상태 값 변경 정보 조회
-            updateOrderStatus =  await userDao.updateOrderStatus(reservationInfo.data[i].reservationId, userId);
-            if(updateOrderStatus.affectedRows === 0){
-                throw new Error("user_credit_update_fail")
-            }
+        for(let i = 0; i < reservationId.length; i++){ // 주문 상태 값 변경 정보 조회
+            updateOrderStatus =  await userDao.updateOrderStatus(reservationId[i], userId);
+                if(updateOrderStatus.affectedRows === 0){
+                    throw new Error("user_credit_update_fail")
+                }
         }
 
         // 좌석 예약 상태 업데이트
             let updateSeatBooked = ""
-            for(let i = 0; i < reservationInfo.data.length; i++){
-                selectReserveInfo = await userDao.selectReserveInfo(reservationInfo.data[i].reservationId, userId);
+            for(let i = 0; i < reservationId.length; i++){
+                selectReserveInfo = await userDao.selectReserveInfo(reservationId[i], userId);
                 updateSeatBooked = await userDao.updateSeatBooked(selectReserveInfo[0].seatId);
 
                 if(updateSeatBooked.affectedRows === 0){
@@ -98,7 +99,6 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
-
         // 유저 데이터 크레딧 및 유저 정보 조회
         const selectUserInfo = await userDao.selectUserInfo(userId) // 토큰의 userId로 유저의 크레딧 조회
         const dbUserId = selectUserInfo[0].id; // db에 저장된 유저 id 정보
@@ -116,9 +116,9 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
                 throw new Error("profile_update_error")
             }
         }
+        
         // 유저 이름만 변경 할 경우
         if(!imageUrl && userName){
-
             result = await userDao.updateUserName(userName, userId);
             if(result.affectedRows === 0){
                 throw new Error("userName_update_error")
@@ -126,7 +126,7 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
         }
 
         // 유저 이름과 프로필 변경하기
-        if(imageUrl || userName){
+        if(imageUrl && userName){
             result = await userDao.updateUserInfo(userName, imageUrl, userId)
             if(result.affectedRows === 0){
                 throw new Error("userProfile_userName_update_error")
@@ -135,12 +135,12 @@ const profileUpdate = async (imageUrl, userTokenDecode, userName) => {
 
         // 업데이트 된 유저 정보 반환하기
         const newUserProfileImage = await userDao.newUserProfileImage(userId);
-        console.log(newUserProfileImage);
+        // console.log(newUserProfileImage);
 
         if(newUserProfileImage.length === 0){
             throw new Error("user_not_found");
         }
-
+        console.log(newUserProfileImage)
         return newUserProfileImage; // 업데이트 된 유저의 새로운 프로필 이미지 반환하기
 
     }catch(error){

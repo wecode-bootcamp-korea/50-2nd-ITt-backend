@@ -47,6 +47,7 @@ const selectItemList = async(adminUserInfo, itemId) => {
             }
 
         // 출연자 정보 불러오기
+        console.log(itemId);
         const actorInfo = await adminDao.actorInfo(itemId);
             if(actorInfo.length === 0){
                 throw new Error("item_infomation_not_found")
@@ -61,6 +62,7 @@ const selectItemList = async(adminUserInfo, itemId) => {
         // 카테고리 정보 불러오기
         const categoryInfo = await adminDao.categoryInfo();
         console.log(categoryInfo);
+
 
         // 공연 정보 + 출연자 정보
         const result = {
@@ -95,16 +97,9 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
         // 공연 ID를 통해 해당 공연의 이미지 업로드
         if(title || runningTime || viewerAge || price || itemNotice || imageUrl || itemId){
             const updateItems = await adminDao.updateItemList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
-
-            if(updateItems.affectedRows === 0){
-                throw new Error("update_fail");
-            }
-        }
-
-        const updateItems = await adminDao.updateItemList(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId);
-
-        if(updateItems.affectedRows === 0){
-            throw new Error("update_fail");
+                if(updateItems.affectedRows === 0){
+                    throw new Error("update_fail");
+                }
         }
 
         //카테고리 이름 업데이트
@@ -132,12 +127,25 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
             if(updatelocationName.affectedRows === 0){
                 throw new Error("update_fail");
             }
+    
+        // 공연 시간 업데이트
+        let updateEventTime = ""
+        for(let i = 0; i < eventTime.length; i++){
+            updateEventTime = await adminDao.updateEventTime(eventTime[i], eventId[i], itemId);
+                if(updateEventTime.affectedRows === 0){
+                    throw new Error("update_fail");
+                }
+        }
+        
+        // 공연 날짜 업데이트
 
-        // 공연 시간 및 날자 업데이트
-        const updateEventDate = await adminDao.updateEventDate(eventDate, eventTime ,eventId, itemId);
-            if(updateEventDate.affectedRows === 0){
-                throw new Error("update_fail");
-            }
+        let updateEventDate = ""
+        for(let i = 0; i < eventDate.length; i++){
+            updateEventDate = await adminDao.updateEventDate(eventDate[i], eventId[i], itemId)
+                if(updateEventDate.affectedRows === 0){
+                    throw new Error("update_fail");
+                }
+        }
 
         // 출연자 업데이트
         const deleteActorName = adminDao.deleteActorName(itemId); // 아이템아이디 해당하는 전체 유저를 삭제 후 새로 추가
@@ -153,9 +161,7 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
                 throw new Error("update_fail");
             }
 
-        
         return true;
-        
     }catch(error){
         console.log(error);
         throw error

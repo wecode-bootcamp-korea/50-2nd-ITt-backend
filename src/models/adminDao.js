@@ -90,7 +90,8 @@ const itemOption = async(itemId) => {
     try{
         const result = await database.appDataSoure.query(
             `
-            SELECT 
+            SELECT
+                id as eventId,
                 DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate,
                 DATE_FORMAT(event_time, '%H:%i') AS eventTime
             FROM item_options
@@ -216,17 +217,15 @@ const updatelocationName = async(locationName, locationId) => {
     }
 }
 
-// 공연 시간 및 날짜 업데이트
-const updateEventDate = async(eventDate, eventTime ,eventId, itemId) => {
+// 공연 시간 업데이트
+const updateEventTime = async(eventTime, eventId, itemId) => {
     try{
-      
         const result = await database.appDataSoure.query(
             `
                 UPDATE item_options
-                    SET event_date = ? , event_time = ?
-                WHERE id = ? and item_id = ?
-
-            `,[eventDate, eventTime ,eventId, itemId]
+                    SET event_time = ?
+                WHERE id = ? AND item_id = ?
+            `,[eventTime, eventId, itemId]
         )
         return result;
     }catch(error){
@@ -234,6 +233,27 @@ const updateEventDate = async(eventDate, eventTime ,eventId, itemId) => {
         throw error;
     }
 }
+
+// 공연 날짜 업데이트
+const updateEventDate = async(eventDate, eventId, itemId) => {
+    try{
+      
+        const result = await database.appDataSoure.query(
+            `
+                UPDATE item_options
+                    SET event_date = ? 
+                WHERE id = ? and item_id = ?
+
+            `,[eventDate ,eventId, itemId]
+        )
+        return result;
+    }catch(error){
+        console.log(error)
+        throw error;
+    }
+}
+
+
 
 //출연자 이름 삭제 하기 -? item_id를 기준으로 삭제 후 새 출연자 추가
 const deleteActorName = async(itemID) =>{
@@ -641,7 +661,8 @@ module.exports = {
     updatelocationName, // 공연장 이름 변경
     deleteActorName, // 출연자 삭제
     updateActorName, // 출연자 추가
-    updateEventDate, // 공연 시간 및 날짜 변경
+    updateEventTime, // 공연 시간 업데이트 
+    updateEventDate, // 공연 날짜 업데이트
     
     // 공연 삭제
     deleteActor, // 출연자 삭제

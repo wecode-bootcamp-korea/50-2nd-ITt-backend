@@ -138,7 +138,6 @@ const updateItemList = async(adminUserInfo, itemId, title, runningTime, viewerAg
         }
         
         // 공연 날짜 업데이트
-
         let updateEventDate = ""
         for(let i = 0; i < eventDate.length; i++){
             updateEventDate = await adminDao.updateEventDate(eventDate[i], eventId[i], itemId)

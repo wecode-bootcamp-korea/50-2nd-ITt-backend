@@ -2,14 +2,10 @@ const detailDao = require('../models/detailDao');
 
 const getItemsByItemId = async (itemId) => {
     const { itemInfo,
-            itemStartDateInfo,
-            itemFinishDateInfo,
             calenderTime,
             actorsInfoByitemId
           } = await detailDao.getItemsByItemId(itemId)
     return {itemInfo,
-            itemStartDateInfo,
-            itemFinishDateInfo,
             calenderTime,
             actorsInfoByitemId}
 };

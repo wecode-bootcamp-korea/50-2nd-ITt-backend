@@ -12,12 +12,7 @@ const appDataSoure = new DataSource({
     password: process.env.TYPEORM_PASSWORD,
     database: process.env.TYPEORM_DATABASE,
 })
-appDataSoure.initialize()
-.then(() => {
-    console.log("Data Source has been initialize");
-}).catch((err) => {
-    console.err("Error occurred during Data Source initialization", err)
-})
+
 module.exports = {
     appDataSoure
 }

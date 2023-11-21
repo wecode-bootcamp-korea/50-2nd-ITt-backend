@@ -1,29 +1,31 @@
 const {appDataSoure} = require('../utils/database')
-const utilError = require('../utils/error')
+const {utilError} = require('../utils/error')
 
 // 공연별 상세 정보
 const getItemsByItemId = async (itemId) => {
     try{
         const itemInfo = await appDataSoure.query(`
-        SELECT 
-            items.id AS itemId,
-            items.title,
-            items.image,
-            items.item_notice AS itemNotice,
-            items.running_time AS runningTime,
-            items.viewer_age AS viewerAge,
-            items.price,
-            locations.name AS locationName,
-            locations.id AS locationId
-        FROM 
-            items
-        JOIN 
-            locations_items ON items.id = locations_items.item_id
-        JOIN 
-            locations ON locations_items.location_id = locations.id
-        WHERE
-            items.id = ?
-        `,[itemId]);
+            SELECT 
+                items.id AS itemId,
+                items.title,
+                items.image,
+                items.item_notice AS itemNotice,
+                items.running_time AS runningTime,
+                items.viewer_age AS viewerAge,
+                items.price,
+                locations.name AS locationName,
+                locations.id AS locationId,
+                locations.coordinate_x AS lat,
+                locations.coordinate_y AS lng
+            FROM 
+                items
+            JOIN 
+                locations_items ON items.id = locations_items.item_id
+            JOIN 
+                locations ON locations_items.location_id = locations.id
+            WHERE
+                items.id = ?
+            `,[itemId]);
         const actorsInfoByitemId = await appDataSoure.query(`
             SELECT
                 name
@@ -32,49 +34,24 @@ const getItemsByItemId = async (itemId) => {
             WHERE 
                 actors.item_id= ?
         `, [itemId])
-     const startDateInfo = await appDataSoure.query(`
-        SELECT 
-            event_date AS eventDate
-        FROM 
-            item_options
-        WHERE 
-            item_id = ?
-        ORDER BY event_date
-        LIMIT 1
-     `,[itemId])
-     const itemStartDateInfo = startDateInfo[0].eventDate.toISOString().split('T')[0]
-     
-     const finishDateInfo = await appDataSoure.query(`
-        SELECT 
-            event_date AS eventDate
-        FROM 
-            item_options
-        WHERE 
-            item_id = ?
-        ORDER BY event_date DESC
-        LIMIT 1
-     `,[itemId])
-     const itemFinishDateInfo = finishDateInfo[0].eventDate.toISOString().split('T')[0]
-     
-     const calenderTime = await appDataSoure.query(`
-        SELECT
-            item_options.id,
-            DATE_FORMAT(event_time, '%H:%i') AS eventTime,
-            DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate
-        FROM 
-            item_options
-        WHERE
-            item_id = ?
-     `,[itemId])
-     return {itemInfo,
-             itemStartDateInfo,
-             itemFinishDateInfo,
-             calenderTime,
-             actorsInfoByitemId}
-    }catch(err){
-        console.log(err)
-        utilError.error(500, 'INVALID_DATA_INPUT')
-    }
+
+        const calenderTime = await appDataSoure.query(`
+            SELECT
+                item_options.id,
+                DATE_FORMAT(event_time, '%H:%i') AS eventTime,
+                DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate
+            FROM 
+                item_options
+            WHERE
+                item_id = ?
+        `,[itemId])
+        return {itemInfo,
+                calenderTime,
+                actorsInfoByitemId}
+        }catch(err){
+            console.log(err)
+            utilError.error(500, 'INVALID_DATA_INPUT')
+        }
 }
 // 전체 좌석 정보 
 const bookedType = {

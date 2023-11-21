@@ -8,6 +8,7 @@ const verifyToken = async(req,res, next) => {
         }else{
             try{
             const decodedToken = jwt.verify(jwtToken, process.env.TYPEORM_SECRETKEY)
+            
             req.userData = decodedToken
             next()
         }catch(err){

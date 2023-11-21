@@ -218,6 +218,7 @@ const insertItemList = async(adminUserInfo, title, runningTime, viewerAge, price
         const adminUserId = adminUserInfo.id; //디코드된 토큰의 유저 id 담기
         const adminUserEmail = adminUserInfo.email; //디코드된 토큰의 유저 email 담기
 
+        cons
         // 유저 정보를 토대로 DB에 저장되어있는지 확인
         const selectAdminInfo = await adminDao.selectAdminInfo(adminUserId, adminUserEmail)
             if(selectAdminInfo.length === 0){

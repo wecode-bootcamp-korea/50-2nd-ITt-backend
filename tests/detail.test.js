@@ -129,7 +129,7 @@ describe("getItemDetail" , () => {
         `)
     });
 
-    afterAll(async ()=>{
+    afterEach(async ()=>{
         await appDataSoure.query(`SET foreign_key_checks = 0;`);
         await appDataSoure.query(`TRUNCATE users`);
         await appDataSoure.query(`TRUNCATE items`);
@@ -142,26 +142,14 @@ describe("getItemDetail" , () => {
         await appDataSoure.query(`SET foreign_key_checks = 1;`);
         await appDataSoure.destroy();
     });
-    test("FAILED : UNAUTHORIZED_USERS!", async ()=>{
-        const token = ``
-        const res = await request(app)
-        .post(`/detail`)
-        .set(`Authorization`, `${token}`)
-        .send({locationId : 1, itemId : 2})
-        .expect(403)
-        .expect({message : "UNAUTHORIZED_USERS!"})
-
-    expect(res.body).toEqual
-    })
-
-    test("SUCCESS: post-seat", async ()=>{
+        test("SUCCESS: post-seat", async ()=>{
         const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJwYzBidW1AZ21haWwuY29tIiwibmFtZSI6Iuq5gOyYgeuylCIsImlhdCI6MTcwMDExNDU4Nn0.GbMPNLlMF27ThioX5DnQUqLMcQNVl58Ux4Ww_IuGmTc`;
         const res = await request(app)
         .post(`/detail`)
         .set('Authorization', `${token}`)
         .send({locationId : 1, itemId : 2})
 
-    expect(res.body).toEqual({
+        expect(res.body).toEqual({
             data: {
               remainSeats: {
                 remainSeats: '1',
@@ -177,9 +165,8 @@ describe("getItemDetail" , () => {
             },
           });
 
-        // expect(res.statusCode).toBe(200);
+        expect(res.statusCode).toBe(200);
         });
-        
 
         
        

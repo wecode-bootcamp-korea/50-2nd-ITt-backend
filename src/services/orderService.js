@@ -22,7 +22,13 @@ const addReservation = async (userId, itemId, seatIds, itemOptionId, price) => {
   }
 
   // 배열이 아니면 그대로 createReservation 호출
-  return orderDao.createReservation(userId, itemId, seatIds, itemOptionId);
+  return orderDao.createReservation(
+    userId,
+    itemId,
+    seatIds,
+    itemOptionId,
+    price
+  );
 };
 
 const getReservation = async (userId, status) => {

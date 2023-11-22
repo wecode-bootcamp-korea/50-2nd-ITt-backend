@@ -6,6 +6,8 @@ const { join } = require("path");
 const { ifError } = require("assert");
 const { error } = require("console");
 const { SimpleConsoleLogger } = require("typeorm");
+const { rmSync } = require("fs");
+const { errorMonitor } = require("events");
 
 // 관라지 페이지 공연 리스트 불러오기
 const selectList = async(req, res) => { 
@@ -21,8 +23,6 @@ const selectList = async(req, res) => {
         return res.json({data : result});
 
     }catch(error){
-        console.log(error);
-        
         if(error.message === "key_error"){
             return res.json({message : "key_error"});
         }
@@ -30,8 +30,13 @@ const selectList = async(req, res) => {
         if(error.message === "admin_user_not_found"){
             return res.json({message : "admin_user_not_found"})
         }
+
+        if(error.message === "item_infomation_not_found"){
+            return res.json({message : "item_infomation_not_found"})
+        }
     }
-} 
+}
+
 
 // 공연 상세정보 불러오기
 const selectItemList = async(req, res) => {
@@ -49,14 +54,28 @@ const selectItemList = async(req, res) => {
         const result = await adminService.selectItemList(adminUserInfo, itemId)
         return res.json({data : result});
 
-    }catch(error){
+    }catch(error){ 
         console.log(error);
         if(error.message === "key_error"){
             return res.json({message : "key_error"})
         }
+
         if(error.message === "item_infomation_not_found"){
             return res.json({message : "item_infomation_not_found"})
         }
+    
+        if(error.message === "item_infomation_not_found"){
+            return res.json({message : "item_infomation_not_found"})
+        }
+
+        if(error.message === "actor_information_not_found"){
+            return res.json({message : "actor_information_not_found"})
+        }
+
+        if(error.message === "category_information_not_found"){
+            return res.json({message : "category_information_not_found"})
+        }
+
     }
 }
 
@@ -68,7 +87,6 @@ const updateItemList = async(req, res) => {
         const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName } = req.body;
         const itemImage = req.file;
 
-        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName )
         
         if(!adminUserInfo || !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !itemImage ){
             throw new Error("key_error");
@@ -84,23 +102,44 @@ const updateItemList = async(req, res) => {
         }
 
         const result = await adminService.updateItemList(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl)
-        
-        if(result !== true){
-            throw new Error("update_fail");
-        }
-        return res.json({message : "update_success"});
+
+        return res.json({message : "update_success" , data : result});
 
     }catch(error){
         if(error.message === "key_error"){
             return res.json({message : "key_error"});
         }
-        
-        if(error.message === "update_fail"){
-            return res.json({message : "update_fail"});
-        }
 
         if(error.message === "admin_user_not_found"){
             return res.json({message : "admin_user_not_found"});
+        }
+
+        if(error.message === "item_update_fail"){
+            return res.json({message : "item_update_fail"});
+        }
+
+        if(error.message === "categoryInfo_select_fail"){
+            return res.json({message : "categoryInfo_select_fail"})
+        }
+
+        if(error.message === "categoryName_update_fail"){
+            return res.json({message : "categoryName_update_fail"})
+        }
+
+        if(error.message === "LocationInfo_select_fail"){
+            return res.json({message : "LocationInfo_select_fail"})
+        }
+
+        if(error.message === "LocationName_update_fail"){
+            return res.json({message : "LocationName_update_fail"})
+        }
+
+        if(error.message === "actor_delete_fail"){
+            return res.json({message : "actor_delete_fail"})
+        }
+
+        if(error.message === "actorName_update_fail"){
+            return res.jsonm({message : "actorName_update_fail"})
         }
     }
 }
@@ -127,20 +166,58 @@ const deleteItemList = async(req, res) => {
         return res.json({date : "delete_success"})
 
     }catch(error){
-        console.log(error)
+        console.log(error);
         if(error.message === "key_error"){
             return res.json({message : "key_error"})
-        }
-
-        if(error.message === "delete_fail"){
-            return res.json({message : "delete_fail"})
         }
 
         if(error.message === "admin_user_not_found"){
             return res.json({message : "admin_user_not_found"})
         }
+
+        if(error.message === "actor_delete_fail"){
+            return res.json({message : "actor_delete_fail"})
+        }
+
+        if(error.message === "item_option_delete_fail"){
+            return res.json({message : "item_option_delete_fail"})
+        }
+
+        if(error.message === "location_option_delete_fail"){
+            return res.json({message : "location_option_delete_fail"})
+        }
+
+        if(error.message === "item_delete_fail"){
+            return res.json({message : "item_delete_fail"})
+        }
+
     }
 }
+
+//공연 추가 전 카테고리 정보 불러오기
+const selectCategoryList = async(req, res) => {
+    try{
+        //디코된 유저의 토큰 정보 불러오기
+        const adminUserInfo = req.user;
+
+        if(!adminUserInfo){
+            throw new Error("key_error");
+        }
+
+        const result = await adminService.selectCategoryList(adminUserInfo);
+        return res.json({data : result});
+
+    }catch(error){
+
+        if(error.message === "key_error"){
+            return res.json({message : "key_error"})
+        }
+        if(error.message === "select_category_Infomation_fail"){
+            return res.json({message : "select_category_Infomation_fail"})
+        }
+    }
+}
+
 //공연 추가
 const insertItemList = async(req, res) => {
     try{
@@ -149,9 +226,7 @@ const insertItemList = async(req, res) => {
         const { title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime  } = req.body;
         const itemImage = req.file;
 
-        console.log(title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, eventDate, eventTime, itemImage)
-
-        if(!adminUserInfo || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime || !itemImage){
+        if(!adminUserInfo || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !eventDate || !eventTime && !itemImage){
             throw new Error("key_error");
         }
 
@@ -173,18 +248,50 @@ const insertItemList = async(req, res) => {
         return res.json({data : "insert_success"});
 
     }catch(error){
-        console.log(error);
+        console.log(error)
 
         if(error.message === "key_error"){
             return res.json({error : "key_error"});
         }     
-        
-        if(error.message === "insert_fail"){
-            return res.json({message : "insert_fail"})
-        }
 
         if(error.message === "admin_user_not_found"){
             return res.json({message : "admin_user_not_found"})
+        }
+
+        if(error.message === "category_infomation_not_found"){
+            return res.json({message : "category_infomation_not_found"})
+        }
+
+        if(error.message === "insert_item_fail"){
+            return res.json({message : "insert_item_fail"})
+        }
+
+        if(error.message === "select_actor_fail"){
+            return res.json({message : "select_actor_fail"})
+        }
+
+        if(error.message === "insert_actor_fail"){
+            return res.json({message : "insert_actor_fail"})
+        }
+
+        if(error.message === "insert_event_date_fail"){
+            return res.json({message : "insert_event_date_fail"})
+        }
+
+        if(error.message === "select_item_option_information_fail"){
+            return res.json({message : "select_item_option_information_fail"})
+        }
+
+        if(error.message === "insert_event_time_fail"){
+            return res.json({message : "insert_event_time_fail"})
+        }
+
+        if(error.message === "select_location_info_fail"){
+            return res.json({message : "select_location_info_fail"})
+        }
+
+        if(error.message === "insert_location_item_fail"){
+            return res.json({message : "insert_location_item_fail"})
         }
     }
 
@@ -210,6 +317,10 @@ const selectOrderList = async (req, res) => {
         }
         if(error.message === "admin_user_not_found"){
             return res.json({message : "admin_user_not_found"})
+        }
+
+        if(error.message === "select_order_information_fail"){
+            return res.json({message : "select_order_information_fail"})
         }
 
     }
@@ -239,9 +350,42 @@ const deleteOrderList = async(req, res) => {
             return res.json({message : "key_error"});
         }
 
+        if(error.message === "admin_user_not_found"){
+            return res.json({message : "admin_user_not_found"})
+        }
+
         if(error.message === "cancel_fail"){
             return res.json({message : "cancel_fail"})
         }
+
+        if(error.message === "select_reservation_information_fail"){
+            return res.json({message : "select_reservation_information_fail"})
+        }
+
+        if(error.message === "cancel_seat_fail"){
+            return res.json({message : "cancel_seat_fail"})
+        }
+
+        if(error.message === "select_user_informaiton_fail"){
+            return res.json({message : "select_user_informaiton_fail"})
+        }
+
+        if(error.message === "update_reservation_status_fail"){
+            return res.json({message : "update_reservation_status_fail"})
+        }
+
+        if(error.message === "select_amount_fail"){
+            return res.json({message : "select_amount_fail"})
+        }
+
+        if(error.message === "select_user_credit_fail"){
+            return res.json({message : "select_user_credit_fail"})
+        }
+
+        if(error.message === "update_user_credit_fail"){
+            return res.json({message : "update_user_credit_fail"})
+        }
+
     }
 }
 
@@ -252,6 +396,7 @@ module.exports = {
     updateItemList,
     deleteItemList,
     insertItemList,
+    selectCategoryList,
 
 // 대시보드
     selectOrderList,

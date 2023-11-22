@@ -42,7 +42,7 @@ const selectList = async() => {
 // 공연 정보 불러오기(item)
 const selectItemList = async(itemId) => {
     try{
-      
+      console.log(itemId)
         const result = await database.appDataSoure.query(
             `
             SELECT 
@@ -406,6 +406,22 @@ const selectItemInfo = async (title) =>{
     }
 }
 
+//공연 추가 전 카테고리 정보 불러오기
+const selectCategoryList = async() => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT
+                    id as categoryId,
+                    name as categoryName
+                FROM categories
+            `
+        )
+        return result;
+    }catch(error){
+        throw error;
+    }
+}
 
 //공연 정보 추가
 const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, categoryId) => {
@@ -452,19 +468,18 @@ const insertActor = async(actorName ,ItemId) => {
     }
 }
 
- // 공연일 및 시간 추가
-const insertEventDateTime = async(event_date ,event_time ,ItemId) => {
+// 공연 날짜 추가
+const insertEventDate = async(eventDate, ItemId) => {
     try{
         const result = await database.appDataSoure.query(
             `
                 INSERT INTO item_options(
                     event_date, 
-                    event_time,
                     item_id
                 ) VALUES (
-                    ?, ?, ?
+                    ?, ?
                 )
-            `,[event_date ,event_time ,ItemId]
+            `,[eventDate, ItemId]
         )
         return result;
     }catch(error){
@@ -472,6 +487,64 @@ const insertEventDateTime = async(event_date ,event_time ,ItemId) => {
         throw error;
     }
 }
+
+// 추가된 공연 옵션 정보 가져오기
+
+const selectItemOptionInfo = async(itemId) => {
+    try{
+        const result = database.appDataSoure.query(
+            `
+                SELECT 
+                    id
+                FROM item_options
+                WHERE item_id = ?
+            `,[itemId]
+        )
+        return result;
+    }catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
+// 공연 시간 추가
+const insertEventTime = async(eventTime, eventId, itemId ) => {
+    try{
+        const result = await database.appDataSoure.query(
+            `
+            UPDATE item_options
+                SET event_time = ?
+            WHERE id = ? AND item_id = ?
+            `,[eventTime, eventId, itemId]
+        )
+        console.log(result)
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
+// 공연일 및 시간 추가
+// const insertEventTime = async(event_date ,event_time ,ItemId) => {
+//     try{
+//         const result = await database.appDataSoure.query(
+//             `
+//                 INSERT INTO item_options(
+//                     event_date, 
+//                     event_time,
+//                     item_id
+//                 ) VALUES (
+//                     ?, ?, ?
+//                 )
+//             `,[event_date ,event_time ,ItemId]
+//         )
+//         return result;
+//     }catch(error){
+//         console.log(error);
+//         throw error;
+//     }
+// }
 
 // 공연장 정보 불러오기
 const selectLocationInfo = async(locationName) => {
@@ -509,6 +582,27 @@ const selectLocationInfo = async(locationName) => {
         return result;
     }catch(error){
         console.log(error);
+        throw error;
+    }
+}
+
+// 등록된 공연정보 전달하기
+
+const selectItemImage = async(itemId) =>{
+    try{
+        const result = await database.appDataSoure.query(
+            `
+                SELECT
+                    id as itemId,
+                    title,
+                    image as itemImage
+                FROM items
+                WHERE id = ?
+
+            `,[itemId]
+        )
+        return result
+    }catch(error){
         throw error;
     }
 }
@@ -662,19 +756,27 @@ module.exports = {
     deleteActorName, // 출연자 삭제
     updateActorName, // 출연자 추가
     updateEventTime, // 공연 시간 업데이트 
+    selectItemOptionInfo, // 추가된 공연 옵션 정보 가져오기
     updateEventDate, // 공연 날짜 업데이트
+    selectItemImage, // 추가한 공연 데이터 보내주기
     
     // 공연 삭제
     deleteActor, // 출연자 삭제
     deleteItemOption, // 공연 옵션 삭제
     deleteLocationOption, // 지역 연결 삭제
     selectCategoryInfo, //카테고리 정보 불러오기
+
+    // 공연 추가
+    selectCategoryList, // 공연 추가 전 카테고리 정보 불러오기
     insertItemList, // 공연 정보 추가
     selectItemInfo, // 공연 정보 불러오기
     insertActor, // 출연자 추가
-    insertEventDateTime, // 공연일 및 시간 추가
+    insertEventDate, // 공연 날짜 추가
+    insertEventTime, // 공연 시간 추가
+
     selectLocationInfo, // 공연장 정보 불러오기
     insertLocationItem, // 공연장 아이템 추가
+
 
     // 대시보드
     selectOrderList, // 사용자 구매 내역 불러오기

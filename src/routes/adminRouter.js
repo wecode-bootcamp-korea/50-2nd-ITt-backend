@@ -17,6 +17,9 @@ router.put("/updateItemList", uploadImage, verfiyToken.verfiyToken, adminControl
 // 공연 정보 삭제
 router.delete("/deleteItemList/:itemId", verfiyToken.verfiyToken, adminController.deleteItemList)
 
+// 공연 정보 추가(카테고리 불러오기)
+router.get("/selectCategoryList", verfiyToken.verfiyToken, adminController.selectCategoryList)
+
 // 공연 정보 추가
 router.post("/insertItemList", uploadImage, verfiyToken.verfiyToken, adminController.insertItemList);
 

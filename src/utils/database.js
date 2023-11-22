@@ -1,10 +1,8 @@
 const {DataSource} = require("typeorm");
-const path = require("path");
-const envPath = path.join(__dirname, "../utils","env")
 const dotenv = require("dotenv");
-dotenv.config({path: envPath});
+dotenv.config();
 
-const appDataSoure = new DataSource({
+const appDataSource = new DataSource({
     type: process.env.TYPEORM_CONNECTION,
     host: process.env.TYPEORM_HOST,
     port: process.env.TYPEORM_PORT,
@@ -13,15 +11,12 @@ const appDataSoure = new DataSource({
     database: process.env.TYPEORM_DATABASE,
 })
 
-
-appDataSoure.initialize()
+appDataSource.initialize()
 .then(() => {
     console.log("Data Source has been initialize");
 }).catch((err) => {
     console.err("Error occurred during Data Source initialization", err)
 })
 
+module.exports = appDataSource
 
-module.exports = {
-    appDataSoure
-}

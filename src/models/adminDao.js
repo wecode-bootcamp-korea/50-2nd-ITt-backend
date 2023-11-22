@@ -1,9 +1,9 @@
-const database = require("../utils/database");
+const appDataSource = require("../utils/database");
 
 // 유저 검증
 const selectAdminInfo = async(userId, userEmail) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id,
@@ -24,7 +24,7 @@ const selectAdminInfo = async(userId, userEmail) => {
 // 관리자 페이지의 공연 리스트 불러오기
 const selectList = async() => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT 
                     id as itemId,
@@ -43,7 +43,7 @@ const selectList = async() => {
 const selectItemList = async(itemId) => {
     try{
       console.log(itemId)
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             SELECT 
                 i.title as title,
@@ -71,7 +71,7 @@ const selectItemList = async(itemId) => {
 // 출연자 정보 불러오기
 const actorInfo = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             SELECT
                 name as actorName
@@ -88,7 +88,7 @@ const actorInfo = async(itemId) => {
 // 공연 옵션 불러오기
 const itemOption = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             SELECT
                 id as eventId,
@@ -107,7 +107,7 @@ const itemOption = async(itemId) => {
 // 카테고리 정보 불러오기
 const categoryInfo = async() => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT 
                     id as categoryId,
@@ -128,7 +128,7 @@ const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, i
 
 // console.log(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId)
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE items
                     SET title =?, running_time = ?, viewer_age = ?, price = ?,  item_notice = ?, image = ?
@@ -146,7 +146,7 @@ const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, i
 // 공연 정보의 카테고리 ID 불러오기
 const selectCategoryIdInfo = async(itemId) =>{
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     title,
@@ -166,7 +166,7 @@ const selectCategoryIdInfo = async(itemId) =>{
 const updateCategoryName = async(categoryName, categoryId) => {
     try{
       
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             UPDATE categories
                 SET name = ?
@@ -184,7 +184,7 @@ const updateCategoryName = async(categoryName, categoryId) => {
 const selectLocationId = async(itemId) => {
     try{
       
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     location_id as locationId
@@ -203,7 +203,7 @@ const selectLocationId = async(itemId) => {
 const updatelocationName = async(locationName, locationId) => {
     try{
       
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE locations
                     SET name = ?
@@ -220,7 +220,7 @@ const updatelocationName = async(locationName, locationId) => {
 // 공연 시간 업데이트
 const updateEventTime = async(eventTime, eventId, itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE item_options
                     SET event_time = ?
@@ -238,7 +238,7 @@ const updateEventTime = async(eventTime, eventId, itemId) => {
 const updateEventDate = async(eventDate, eventId, itemId) => {
     try{
       
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE item_options
                     SET event_date = ? 
@@ -256,13 +256,13 @@ const updateEventDate = async(eventDate, eventId, itemId) => {
 
 
 //출연자 이름 삭제 하기 -? item_id를 기준으로 삭제 후 새 출연자 추가
-const deleteActorName = async(itemID) =>{
+const deleteActorName = async(itemId) =>{
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 DELETE FROM actors
                     WHERE item_id = ?
-            `,[itemID]
+            `,[itemId]
         )
         return result;
     }catch(error){
@@ -274,7 +274,7 @@ const deleteActorName = async(itemID) =>{
 //출연자 이름 업데이트
 const updateActorName = async(actorName, itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             INSERT INTO actors 
             (
@@ -295,7 +295,7 @@ const updateActorName = async(actorName, itemId) => {
 // 출연자 삭제
 const deleteActor = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 DELETE FROM actors
                 WHERE item_id = ?
@@ -311,7 +311,7 @@ const deleteActor = async(itemId) => {
 // 공연 옵션 삭제
 const deleteItemOption = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 DELETE FROM item_options
                 WHERE item_id = ?
@@ -329,7 +329,7 @@ const deleteItemOption = async(itemId) => {
 // 공연 옵션 삭제
 const deleteLocationOption = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 DELETE FROM locations_items
                 WHERE item_id = ?
@@ -345,7 +345,7 @@ const deleteLocationOption = async(itemId) => {
 // 공연 삭제
 const deleteItemList = async(itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 DELETE FROM items
                 WHERE id = ?
@@ -361,7 +361,7 @@ const deleteItemList = async(itemId) => {
 // 카테고리 정보 불러오기
 const selectCategoryInfo = async (categoryName) =>{
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id,
@@ -370,27 +370,17 @@ const selectCategoryInfo = async (categoryName) =>{
                 WHERE name = ?
             `,[categoryName]
         )
-        return result;const selectOrderList = async () => {
-            try{
-                const result = await adminDao.selectOrderList();
-        
-                console.log(result);
-                // return result;
-            }catch(error){
-                throw error;
-            }
-        }
-        
-    }catch(error){
+        return result;
+    } catch(error){
         console.log(error);
         throw error;
     }
-}
+}   
 
 // 공연 정보 불러오기
 const selectItemInfo = async (title) =>{
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id,
@@ -409,7 +399,7 @@ const selectItemInfo = async (title) =>{
 //공연 추가 전 카테고리 정보 불러오기
 const selectCategoryList = async() => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id as categoryId,
@@ -426,7 +416,7 @@ const selectCategoryList = async() => {
 //공연 정보 추가
 const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, categoryId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 INSERT INTO items(
                     title, 
@@ -451,7 +441,7 @@ const insertItemList = async(title, runningTime, viewerAge, price, itemNotice, i
 // 출연자 추가
 const insertActor = async(actorName ,ItemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 INSERT INTO actors(
                     name, 
@@ -471,7 +461,7 @@ const insertActor = async(actorName ,ItemId) => {
 // 공연 날짜 추가
 const insertEventDate = async(eventDate, ItemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 INSERT INTO item_options(
                     event_date, 
@@ -492,7 +482,7 @@ const insertEventDate = async(eventDate, ItemId) => {
 
 const selectItemOptionInfo = async(itemId) => {
     try{
-        const result = database.appDataSoure.query(
+        const result = appDataSource.query(
             `
                 SELECT 
                     id
@@ -510,7 +500,7 @@ const selectItemOptionInfo = async(itemId) => {
 // 공연 시간 추가
 const insertEventTime = async(eventTime, eventId, itemId ) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             UPDATE item_options
                 SET event_time = ?
@@ -549,7 +539,7 @@ const insertEventTime = async(eventTime, eventId, itemId ) => {
 // 공연장 정보 불러오기
 const selectLocationInfo = async(locationName) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id,
@@ -568,7 +558,7 @@ const selectLocationInfo = async(locationName) => {
  // 공연 지역 아이템 추가
  const insertLocationItem = async(locationId, itemId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 INSERT INTO locations_items(
                     location_id,
@@ -590,7 +580,7 @@ const selectLocationInfo = async(locationName) => {
 
 const selectItemImage = async(itemId) =>{
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id as itemId,
@@ -613,37 +603,37 @@ const selectItemImage = async(itemId) =>{
 // 대시보드 리스트 불러오기
 const selectOrderList = async () => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
-            SELECT 
-                u.id AS userId,
-                r.id AS reservationId,
+            SELECT
+                u.id as userId,
+                r.id as reservationId,
                 u.name as userName,
                 i.title as title,
-                DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate,
-                DATE_FORMAT(event_time, '%H:%i') AS eventTime,
+                io.event_date as eventDate,
+                io.event_time as eventTime,
                 r.status as status,
                 r.amount as amount,
                 s.seat_row as seatRow,
                 s.seat_col as seatCol
             FROM reservations r 
                 JOIN users u ON r.user_id = u.id 
-                JOIN items i ON r.item_id = i.id 
                 JOIN item_options io ON r.item_options_id = io.id 
                 JOIN seats s ON r.seat_id = s.id 
-            WHERE status ="complete"
-         `
+                JOIN items i ON r.item_id = i.id 
+            WHERE status = "complete"
+            `
         )
-        return result
+        return result;
     }catch(error){
-        throw error;
+        throw error
     }
 }
 
 // 주문 정보 조회하기
 const selectReservationInfo = async (reservationId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 SELECT
                     id as reservationId,
@@ -665,7 +655,7 @@ const selectReservationInfo = async (reservationId) => {
 // 좌석 예약 상태 변경
 const cancelSeat = async (seatId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE seats
                     SET is_booked = 0
@@ -682,7 +672,7 @@ const cancelSeat = async (seatId) => {
 // 주문 상태 변경하기
 const updateStatus = async (reservationId, userId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
                 UPDATE reservations
                     SET status = "cancel"
@@ -699,7 +689,7 @@ const updateStatus = async (reservationId, userId) => {
 // 유저 크레딧 가져오기
 const selectUserCredit = async(userId) => {
     try{
-        const result = database.appDataSoure.query(
+        const result = appDataSource.query(
             `
             SELECT
                 name,
@@ -718,7 +708,7 @@ const selectUserCredit = async(userId) => {
 // 대시보드 공연 예약 취소
 const updateUsersCredit = async(totalCredit, userId) => {
     try{
-        const result = await database.appDataSoure.query(
+        const result = await appDataSource.query(
             `
             UPDATE users 
                 SET credit = ? 

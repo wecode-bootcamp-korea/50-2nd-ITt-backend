@@ -1,4 +1,4 @@
-const { appDataSource } = require('../utils/database')
+const appDataSource = require('../utils/database')
 
 
 const getUserByEmail = async (email) => {

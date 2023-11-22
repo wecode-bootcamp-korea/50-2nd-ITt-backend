@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const userDao = require('../models/userDao');
 dotenv.config()
 
 const verifyToken = async (req, res, next) => {
@@ -19,3 +18,4 @@ const verifyToken = async (req, res, next) => {
 module.exports = {
     verifyToken
 }
+

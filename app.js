@@ -14,4 +14,4 @@ app.use(routes)
 return app;
 }
 
-module.exports = { createApp }
+module.exports = createApp

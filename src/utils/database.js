@@ -13,6 +13,5 @@ const appDataSoure = new DataSource({
     database: process.env.TYPEORM_DATABASE,
 })
 
-module.exports = {
-    appDataSoure
-}
+module.exports = appDataSoure
+

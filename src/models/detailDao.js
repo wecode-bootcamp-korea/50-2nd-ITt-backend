@@ -1,4 +1,4 @@
-const {appDataSoure} = require('../utils/database')
+const appDataSoure = require('../utils/database')
 const {utilError} = require('../utils/error')
 
 // 공연별 상세 정보

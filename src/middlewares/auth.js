@@ -1,21 +1,20 @@
-const jwt = require('jsonwebtoken')
-const dotenv = require('dotenv')
-dotenv.config()
-const verifyToken = async(req,res, next) => {
-    const jwtToken = req.headers.authorization
-        if(!jwtToken){
-          res.status(403).json({message : 'UNAUTHORIZED_USERS!'})
-        }else{
-            try{
-            const decodedToken = jwt.verify(jwtToken, process.env.TYPEORM_SECRETKEY)
-            
-            req.userData = decodedToken
-            next()
-        }catch(err){
-            console.log(err)
-            return res.status(403).json({message : 'UNAUTHORIZED_USERS!'})
-        }}
-}
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+dotenv.config();
+
+const verifyToken = async (req, res, next) => {
+  const token = req.headers.authorization;
+  try {
+    if (!token) return res.status(401).json({ message: "TOKEN_REQUIRED" });
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    console.error(error);
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
+};
+
 module.exports = {
-    verifyToken
-}
+  verifyToken,
+};

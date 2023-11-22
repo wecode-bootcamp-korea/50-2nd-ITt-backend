@@ -1,7 +1,6 @@
-require("dotenv")
-
-const {createApp} = require("./app")
-const {appDataSoure} = require("./src/utils/database")
+require("dotenv").config();
+const createApp = require("./app")
+const appDataSoure = require("./src/utils/database")
 
 
 const start = async () => {

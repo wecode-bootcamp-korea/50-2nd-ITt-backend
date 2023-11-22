@@ -1,16 +1,17 @@
-const express = require("express");
-const cors = require("cors");
+const http = require('http');
+const express = require('express');
+const cors = require('cors');
 
-const routes = require("./src/routes");
+const routes = require('./src/routes');
 
 const createApp = () => {
-  const app = express();
+const app = express()
 
-  app.use(cors());
-  app.use(express.json());
-  app.use(routes);
+app.use(cors())
+app.use(express.json())
+app.use(routes)
 
-  return app;
-};
+return app;
+}
 
-module.exports = createApp;
+module.exports = createApp

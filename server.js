@@ -1,23 +1,17 @@
-require("dotenv").config();
-const createApp = require("./app")
-const appDataSoure = require("./src/utils/database")
+const http = require("http");
+const dotenv = require("dotenv");
+const createApp = require("./app");
+dotenv.config();
 
+const app = createApp();
 
+const server = http.createServer(app);
+const port = process.env.TYPEORM_SERVER_PORT;
 const start = async () => {
-    try {
-     const app = createApp();
-     appDataSoure.initialize()
-.then(() => {
-    console.log("Data Source has been initialize");
-}).catch((err) => {
-    console.err("Error occurred during Data Source initialization", err)
-})
-      app.listen(process.env.TYPEORM_SERVER_PORT, () => console.log(
-        `Server is listening on ${process.env.TYPEORM_SERVER_PORT}`))
-    } catch (err) { 
-      console.error(err)
-    }
+  try {
+    server.listen(port, () => console.log(`Server is listening on ${port}`));
+  } catch (err) {
+    console.error(err);
   }
-
+};
 start();
-

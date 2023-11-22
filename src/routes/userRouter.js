@@ -5,17 +5,16 @@ const upload = multer({dest : "profileImage/"}).single("profileImage");
 const userController = require("../controllers/userController");
 const verfiyToken = require("../middlewares/verifyToken");
 
+//로그인, admin 회원가입
+router.post('/adminsignup',userController.adminsignup)
+router.post('/kakaologin',userController.kakaologin)
+router.post('/adminlogin',userController.adminlogin)
 
-// 유저 정보 불러오기
+//마이페이지
 router.get("/mypage", verfiyToken.verfiyToken, userController.userInfo)
-
-//mypage 주문 취소
 router.post("/mypage/cancel", verfiyToken.verfiyToken, userController.orderCancel);
-
-//mypage 프로필 수정
 router.post("/mypage/update", upload, verfiyToken.verfiyToken, userController.profileUpdate);
 
-
 module.exports = {
-    router
+  router
 }

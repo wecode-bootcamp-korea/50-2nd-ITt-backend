@@ -3,6 +3,41 @@ const userService = require("../services/userService");
 const s3 = require("../utils/aws-config");
 const imageUpload = require("../middlewares/imageUpload");
 
+
+const adminsignup = async (req, res) => {
+    try {
+        const data = await userService.adminsignup(req.body)
+        return res.status(200).json(data)
+    } catch (error) {
+        return res.status(error.statusCode).json({message : error.message})
+    }
+}
+
+const kakaologin = async (req, res) => {
+    try {
+        const code = req.headers.code;
+        console.log(code);
+      if (!code){
+        return res.status(400).json({message:'INVALID_ACCESTOKEN'})
+      }
+
+        const result = await userService.kakaologin(code);
+        return res.status(200).json({result});
+
+    } catch (error) {
+        return res.json({message : error.message})
+    }
+}
+
+const adminlogin = async (req, res) => {
+    try {
+        const data = await userService.adminlogin(req.body)
+        return res.status(200).json(data)
+    } catch (error) {
+        return res.json({message : error.message})
+    }
+}
+
 // 유저 정보 불러오기
 const userInfo = async(req, res) => {
     try{
@@ -118,7 +153,12 @@ const profileUpdate = async(req, res) =>{
     }
 }
 
-module.exports = {
+
+module.exports  = { 
+    adminsignup, 
+    kakaologin,
+    adminlogin,
+
     userInfo,
     orderCancel,
     profileUpdate

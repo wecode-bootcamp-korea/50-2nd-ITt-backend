@@ -76,6 +76,10 @@ const selectItemList = async(req, res) => {
             return res.json({message : "category_information_not_found"})
         }
 
+        if(error.message === "location_info_not_found"){
+            return res.json({message : "location_info_not_found"})
+        }
+
     }
 }
 
@@ -83,12 +87,11 @@ const selectItemList = async(req, res) => {
 const updateItemList = async(req, res) => {
     try{
         //디코된 유저의 토큰 정보 불러오기
-        const adminUserInfo = req.user;
         const { itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName } = req.body;
         const itemImage = req.file;
 
-        
-        if(!adminUserInfo || !itemId || !title || !runningTime || !viewerAge || !price || !itemNotice || !categoryName || !locationName || !actorName || !itemImage ){
+        console.log(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, itemImage)
+        if( !itemId || (!title && !runningTime && !viewerAge && !price && !itemNotice && !categoryName && !locationName && !actorName && !itemImage) ){
             throw new Error("key_error");
         } 
 
@@ -101,11 +104,12 @@ const updateItemList = async(req, res) => {
             imageUrl = uploadResult.Location; // 업로드된 이미지의 URL 받아옴
         }
 
-        const result = await adminService.updateItemList(adminUserInfo, itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl)
+        const result = await adminService.updateItemList(itemId, title, runningTime, viewerAge, price, itemNotice, categoryName, locationName, actorName, imageUrl)
 
         return res.json({message : "update_success" , data : result});
 
     }catch(error){
+        console.log(error)
         if(error.message === "key_error"){
             return res.json({message : "key_error"});
         }
@@ -163,7 +167,7 @@ const deleteItemList = async(req, res) => {
             throw new Error("delete_fail");
         }
 
-        return res.json({date : "delete_success"})
+        return res.json({message : "delete_success"})
 
     }catch(error){
         console.log(error);
@@ -197,23 +201,21 @@ const deleteItemList = async(req, res) => {
 //공연 추가 전 카테고리 정보 불러오기
 const selectCategoryList = async(req, res) => {
     try{
-        //디코된 유저의 토큰 정보 불러오기
-        const adminUserInfo = req.user;
 
-        if(!adminUserInfo){
-            throw new Error("key_error");
-        }
-
-        const result = await adminService.selectCategoryList(adminUserInfo);
+        const result = await adminService.selectCategoryList();
         return res.json({data : result});
 
     }catch(error){
-
+        console.log(error);
         if(error.message === "key_error"){
             return res.json({message : "key_error"})
         }
         if(error.message === "select_category_Infomation_fail"){
-            return res.json({message : "select_category_Infomation_fail"})
+            return res.json({message : "select_category_Information_fail"})
+        }
+
+        if(error.message === "select_location_Informaition_fail"){
+            return res.json({message : "select_location_Informaition_fail"})
         }
     }
 }
@@ -245,7 +247,7 @@ const insertItemList = async(req, res) => {
             throw new Error("insert_fail")
         }
 
-        return res.json({data : "insert_success"});
+        return res.json({message : "insert_success"});
 
     }catch(error){
         console.log(error)
@@ -343,9 +345,12 @@ const deleteOrderList = async(req, res) => {
         if(result !== true){
             throw new Error("cancel_fail");
         }
-        return res.json({date : "cancel_success"});
+
+        return res.json({message : "cancel_success"});
 
     }catch(error){
+        console.log(error)
+
         if(error.message === "key_error"){
             return res.json({message : "key_error"});
         }

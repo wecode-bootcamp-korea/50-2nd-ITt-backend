@@ -126,11 +126,12 @@ const updateUserCredit = async(userTotalCredit, userId) => {
 
 // 예약상태 업데이트
 const updateSeatBooked = async(seatId) => {
+
     try{
         const result = await appDataSource.query(
             `
                 UPDATE seats
-                    SET is_booked = 1
+                    SET is_booked = 0
                 WHERE id = ?
             `,[seatId]
         )
@@ -144,7 +145,6 @@ const updateSeatBooked = async(seatId) => {
 
 //mypage 주문 취소(유저 아이디 비교해서 삭제해야함)
 const updateOrderStatus = async(reservationId, userId) => {
-
     try{
         const result = await appDataSource.query(
             `

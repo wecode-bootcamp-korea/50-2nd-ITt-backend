@@ -101,7 +101,7 @@ const adminlogin = async (data) => {
     throwError(400,"INVALID_PASSWORD");
   }
   
-  const token = jwt.sign(
+  const adminToken = jwt.sign(
     { id: userSearch[0].id, 
       email: userSearch[0].email, 
       name: userSearch[0].name, 
@@ -109,7 +109,7 @@ const adminlogin = async (data) => {
     }, process.env.SECRET_KEY);
   return {
     message: "ADMIN_SIGN_IN_SUCCESS",
-    token : token,
+    adminToken : adminToken,
     id : userSearch[0].id,
     email : userSearch[0].email,
     name : userSearch[0].name,
@@ -142,8 +142,6 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
         const userId = userTokenDecode.id;
         const userEmail = userTokenDecode.email;
 
-        console.log(reservationInfo)
-
         // 유저 데이터 크레딧 및 유저 정보 조회
         const selectUserInfo = await userDao.selectUserInfo(userId) // 토큰의 userId로 유저의 크레딧 조회
         const dbUserId = selectUserInfo[0].id; // db에 저장된 유저 id 정보
@@ -158,7 +156,7 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
         }
 
         // 주문 정보 조회 하기
-        const reservationId = reservationInfo.reservationIds; // 주문 내역 정보 id 담기
+        let reservationId = reservationInfo.reservationIds; // 주문 내역 정보 id 담기
 
         let selectReserveInfo = ""; 
         let reservationAmount = 0; 
@@ -183,9 +181,11 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
             }
         
         // 주문 데이터 업데이트 -> 데이터 삭제가 아닌 status 값을 cancel로 변경
+
         let updateOrderStatus = ""
-        for(let i = 0; i < reservationId.length; i++){ // 주문 상태 값 변경 정보 조회
-            updateOrderStatus =  await userDao.updateOrderStatus(reservationId[i], userId);
+
+        for(let i = 0; i < reservationId.length; i++){ // 주문 상태 값 변경 정보 조회      
+            updateOrderStatus = await userDao.updateOrderStatus(reservationId[i], userId);
                 if(updateOrderStatus.affectedRows === 0){
                     throw new Error("user_credit_update_fail")
                 }
@@ -196,10 +196,9 @@ const orderCancel = async (reservationInfo, userTokenDecode) => {
             for(let i = 0; i < reservationId.length; i++){
                 selectReserveInfo = await userDao.selectReserveInfo(reservationId[i], userId);
                 updateSeatBooked = await userDao.updateSeatBooked(selectReserveInfo[0].seatId);
-
-                if(updateSeatBooked.affectedRows === 0){
-                    throw new Error("seat_status_update_fail")
-                }
+                    if(updateSeatBooked.affectedRows === 0){
+                        throw new Error("seat_status_update_fail")
+                    }
             }
         return true; // cancel 처리가 완료되면 true 리턴
 

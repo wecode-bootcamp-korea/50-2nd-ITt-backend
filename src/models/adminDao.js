@@ -122,11 +122,63 @@ const categoryInfo = async() => {
     }
 }
 
+// 공연장 정보 불러오기
+const locationInfo = async() => {
+    try{
+        const result = await appDataSource.query(
+            `
+                SELECT 
+                    id as locationId,
+                    name as locationName
+                FROM locations
+            `
+        )
+        return result;
+    }catch(error){
+        console.log(error);
+        throw error
+    }
+}
 
-// 공연 정보 및 이미지 업로드
-const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId) => {
+// 이미지 업로드
+const updateImage = async(imageUrl ,itemId) => {
+    console.log(itemId)
+    try{
+        const result = await appDataSource.query(
+            `
+                UPDATE items
+                    SET image =?
+                WHERE id = ? 
+            `,[imageUrl, itemId]
+        )
+        return result;
+    }catch(error){
+        console.log(error)
+        throw error;
+    }
+}
 
-// console.log(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId)
+// 공연 정보 업데이트
+const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, itemId) => {
+    console.log(title, runningTime, viewerAge, price, itemNotice, itemId)
+    try{
+        const result = await appDataSource.query(
+            `
+                UPDATE items
+                    SET title =?, running_time = ?, viewer_age = ?, price = ?,  item_notice = ?
+                WHERE id = ? 
+            `,[title, runningTime, viewerAge, price, itemNotice, itemId]
+        )
+        return result;
+    }catch(error){
+        console.log(error)
+        throw error;
+    }
+}
+
+// 공연 정보 전부 업데이트(아이템 + 이미지)
+const updateAllItemList = async(title, runningTime, viewerAge, price, itemNotice, imageUrl, itemId) => {
+    console.log(title, runningTime, viewerAge, price, itemNotice, itemId, imageUrl)
     try{
         const result = await appDataSource.query(
             `
@@ -143,35 +195,16 @@ const updateItemList = async(title, runningTime, viewerAge, price, itemNotice, i
 }
 
 
-// 공연 정보의 카테고리 ID 불러오기
-const selectCategoryIdInfo = async(itemId) =>{
-    try{
-        const result = await appDataSource.query(
-            `
-                SELECT
-                    title,
-                    category_id as categoryId
-                FROM items 
-                    WHERE id = ?
-            `,[itemId]
-        )
-        return result
-    }catch(error){
-        console.log(error);
-        throw error;
-    }
-}
 
-// 공연 정보의 카테고리 업데이트
-const updateCategoryName = async(categoryName, categoryId) => {
+const insertCategoryId = async(categoryId, itemId) => {
     try{
       
         const result = await appDataSource.query(
             `
-            UPDATE categories
-                SET name = ?
+            UPDATE items
+                SET category_id = ?
             WHERE id = ? 
-            `,[categoryName, categoryId]
+            `,[categoryId, itemId]
         )
         return result;
     }catch(error){
@@ -199,16 +232,16 @@ const selectLocationId = async(itemId) => {
     }
 }
 
-//공연 지역 이름 업데이트
-const updatelocationName = async(locationName, locationId) => {
+// //공연 지역 이름 업데이트
+const updateLocationItem = async(selectlocationId, itemId) => {
     try{
       
         const result = await appDataSource.query(
             `
-                UPDATE locations
-                    SET name = ?
-                WHERE id = ?
-            `,[locationName, locationId]
+                UPDATE locations_items
+                    SET location_id = ?
+                WHERE item_id = ?
+            `,[selectlocationId, itemId]
         )
         return result;
     }catch(error){
@@ -216,7 +249,6 @@ const updatelocationName = async(locationName, locationId) => {
         throw error;
     }
 }
-
 // 공연 시간 업데이트
 const updateEventTime = async(eventTime, eventId, itemId) => {
     try{
@@ -536,6 +568,7 @@ const insertEventTime = async(eventTime, eventId, itemId ) => {
 //     }
 // }
 
+
 // 공연장 정보 불러오기
 const selectLocationInfo = async(locationName) => {
     try{
@@ -597,9 +630,7 @@ const selectItemImage = async(itemId) =>{
     }
 }
 
-
 ////////////////////////////////////대시보드////////////////////////////////////////
-
 // 대시보드 리스트 불러오기
 const selectOrderList = async () => {
     try{
@@ -610,8 +641,8 @@ const selectOrderList = async () => {
                 r.id as reservationId,
                 u.name as userName,
                 i.title as title,
-                io.event_date as eventDate,
-                io.event_time as eventTime,
+                DATE_FORMAT(event_date, '%Y-%m-%d') AS eventDate,
+                DATE_FORMAT(event_time, '%H:%i') AS eventTime,
                 r.status as status,
                 r.amount as amount,
                 s.seat_row as seatRow,
@@ -729,20 +760,22 @@ module.exports = {
     // 공통
     selectAdminInfo, // admin 유저 조회
 
-    // 리스트
+    // 
     selectList, // 공연 전체 리스트 조회
     selectItemList, // 공연 상세 정보 조회
     actorInfo, // 출연자 정보 조회
-    itemOption, // 공연 옵션 정보
+    itemOption, // 공연 옵션 정보 
     categoryInfo, // 카테고리 정보 불러오기
+    locationInfo, // 공연장 정보 불러오기
     deleteItemList, // 공연 정보 삭제
 
     // 공연 정보 변경
-    updateItemList, // 공연 정보 변경
-    selectCategoryIdInfo, // 카테고리 정보 조회
-    updateCategoryName, // 카테고리 이름 변경
+    insertCategoryId, // 공연장 카테고리 정보 변경
     selectLocationId, // 공연장 정보 조회
-    updatelocationName, // 공연장 이름 변경
+    updateImage, // 공연장 이미지 업로드 
+    updateItemList, // 공연 정보 변경
+    updateAllItemList, // 공연 정보 및 이미지 변경
+    updateLocationItem, // 공연아이템 정보 변경
     deleteActorName, // 출연자 삭제
     updateActorName, // 출연자 추가
     updateEventTime, // 공연 시간 업데이트 
@@ -763,7 +796,6 @@ module.exports = {
     insertActor, // 출연자 추가
     insertEventDate, // 공연 날짜 추가
     insertEventTime, // 공연 시간 추가
-
     selectLocationInfo, // 공연장 정보 불러오기
     insertLocationItem, // 공연장 아이템 추가
 
